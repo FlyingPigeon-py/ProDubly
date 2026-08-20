@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; background: #0a0c0d; }
+  a { color: oklch(0.80 0.13 210); text-decoration: none; }
+  a:hover { color: oklch(0.86 0.13 210); }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#0a0c0d;color:#e9ebed;font-family:'Space Grotesk',sans-serif;display:flex;flex-direction:column">
+
+  <div style="flex:1;min-height:560px;min-width:0;background:#101315;overflow:hidden;position:relative;display:flex;flex-direction:column">
+
+    <!-- ===== 01 Библиотека ===== -->
+    <sc-if value="{{ isLib }}" hint-placeholder-val="{{ true }}">
+      <div style="height:60px;flex:none;border-bottom:1px solid #1e2225;display:flex;align-items:center;justify-content:space-between;padding:0 28px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;letter-spacing:.24em;color:oklch(0.80 0.13 85)">ДУБЛЬ</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div onClick="{{ openSettings }}" style="width:34px;height:34px;border:1px solid #2c3136;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer" style-hover="border-color:#4a5158">
+            <div style="width:16px;height:1px;background:#8b9298;position:relative"><div style="position:absolute;left:4px;top:-2px;width:5px;height:5px;border-radius:99px;background:#8b9298"></div></div>
+            <div style="width:16px;height:1px;background:#8b9298;position:relative"><div style="position:absolute;left:9px;top:-2px;width:5px;height:5px;border-radius:99px;background:#8b9298"></div></div>
+          </div>
+          <div onClick="{{ goImport }}" style="background:oklch(0.80 0.13 85);color:#14161a;border-radius:8px;padding:9px 16px;font-size:14px;font-weight:500;cursor:pointer" style-hover="background:oklch(0.86 0.13 85)">Добавить пак</div>
+        </div>
+      </div>
+      <div style="flex:1;min-height:0;overflow-y:auto;padding:36px 28px;display:flex;flex-direction:column;gap:26px">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:30px;font-weight:500;letter-spacing:-0.01em">Библиотека</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b9298">5 паков · 1,9 ГБ на диске</div>
+          </div>
+          <div style="display:flex;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase">
+            <div style="border:1px solid #2c3136;border-radius:99px;padding:6px 12px;color:#cfd4d8;cursor:pointer">все</div>
+            <div style="border:1px solid #1e2225;border-radius:99px;padding:6px 12px;color:#6d757b;cursor:pointer" style-hover="color:#cfd4d8">в работе</div>
+            <div style="border:1px solid #1e2225;border-radius:99px;padding:6px 12px;color:#6d757b;cursor:pointer" style-hover="color:#cfd4d8">готовые</div>
+            <div onClick="{{ goEmpty }}" style="border:1px solid #1e2225;border-radius:99px;padding:6px 12px;color:#6d757b;cursor:pointer" style-hover="color:#cfd4d8">пустая</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,290px));gap:18px;align-items:stretch">
+
+          <div style="background:#15181b;border:1px solid #23272b;border-radius:10px;overflow:hidden;display:flex;flex-direction:column">
+            <div style="height:158px;background:#141719 url('https://picsum.photos/seed/elevator-quarrel/640/360') center/cover no-repeat;position:relative">
+              <div style="position:absolute;left:10px;top:10px;background:#0d0f11cc;border-radius:6px;padding:3px 7px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#cfd4d8">01:48</div>
+            </div>
+            <div style="flex:1;min-height:178px;padding:16px;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <div style="font-size:17px;font-weight:500">Ссора в лифте</div>
+                <div style="display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1;color:#8b9298">
+                  <span>rina.k</span>
+                  <span style="color:#3a4045">·</span>
+                  <span>en → ru</span>
+                  <span style="color:#3a4045">·</span>
+                  <span style="display:flex;align-items:center;gap:6px" title="реплик">
+                    <span style="display:flex;flex-direction:column;gap:2px;width:10px">
+                      <span style="width:10px;height:1.5px;border-radius:99px;background:#6d757b"></span>
+                      <span style="width:7px;height:1.5px;border-radius:99px;background:#6d757b"></span>
+                      <span style="width:10px;height:1.5px;border-radius:99px;background:#6d757b"></span>
+                    </span>
+                    12
+                  </span>
+                </div>
+              </div>
+              <div style="display:flex;gap:5px;align-items:center">
+                <div style="width:22px;height:22px;border-radius:99px;background-image:repeating-linear-gradient(135deg,#2a2f34 0 4px,#20252a 4px 8px);border:2px solid oklch(0.80 0.13 210)"></div>
+                <div style="width:22px;height:22px;border-radius:99px;background-image:repeating-linear-gradient(135deg,#2a2f34 0 4px,#20252a 4px 8px);border:2px solid oklch(0.80 0.13 85)"></div>
+                <div style="width:22px;height:22px;border-radius:99px;background-image:repeating-linear-gradient(135deg,#2a2f34 0 4px,#20252a 4px 8px);border:2px solid oklch(0.80 0.13 330)"></div>
+                <div style="width:22px;height:22px;border-radius:99px;background-image:repeating-linear-gradient(135deg,#2a2f34 0 4px,#20252a 4px 8px);border:2px solid oklch(0.80 0.13 145)"></div>
+              </div>
+              <div onClick="{{ goRecord }}" style="margin-top:auto;position:relative;height:40px;background:oklch(0.56 0.085 85);border-radius:9px;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:9px;font-size:14px;font-weight:500;cursor:pointer">
+                <div style="position:absolute;left:0;top:0;bottom:0;width:60%;background:oklch(0.80 0.13 85)"></div>
+                <div style="position:relative;z-index:1;display:flex;align-items:center;gap:9px;font-weight:700;color:#14161a">
+                  <div style="width:0;height:0;border-left:8px solid #14161a;border-top:5px solid transparent;border-bottom:5px solid transparent"></div>
+                  Продолжить · 60%
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#15181b;border:1px solid #23272b;border-radius:10px;overflow:hidden;display:flex;flex-direction:column">
+            <div style="height:158px;background:#141719 url('https://picsum.photos/seed/rain-interrogation/640/360') center/cover no-repeat;position:relative">
+              <div style="position:absolute;left:10px;top:10px;background:#0d0f11cc;border-radius:6px;padding:3px 7px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#cfd4d8">00:52</div>
+            </div>
+            <div style="flex:1;min-height:178px;padding:16px;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <div style="font-size:17px;font-weight:500">Допрос под дождём</div>
+                <div style="display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1;color:#8b9298">
+                  <span>noirclub</span>
+                  <span style="color:#3a4045">·</span>
+                  <span>ru</span>
+                  <span style="color:#3a4045">·</span>
+                  <span style="display:flex;align-items:center;gap:6px" title="реплик">
+                    <span style="display:flex;flex-direction:column;gap:2px;width:10px">
+                      <span style="width:10px;height:1.5px;border-radius:99px;background:#6d757b"></span>
+                      <span style="width:7px;height:1.5px;border-radius:99px;background:#6d757b"></span>
+                      <span style="width:10px;height:1.5px;border-radius:99px;background:#6d757b"></span>
+                    </span>
+                    7
+                  </span>
+                </div>
+              </div>
+              <div style="display:flex;gap:5px;align-items:center">
+                <div style="width:22px;height:22px;border-radius:99px;background-image:repeating-linear-gradient(135deg,#2a2f34 0 4px,#20252a 4px 8px);border:2px solid oklch(0.80 0.13 210)"></div>
+                <div style="width:22px;height:22px;border-radius:99px;background-image:repeating-linear-gradient(135deg,#2a2f34 0 4px,#20252a 4px 8px);border:2px solid oklch(0.80 0.13 330)"></div>
+              </div>
+              <div style="margin-top:auto;display:flex;gap:6px;flex-wrap:wrap">
+                <div style="border:1px solid #2c3136;border-radius:99px;padding:3px 9px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#cfd4d8">нет фонограммы</div>
+              </div>
+              <div onClick="{{ goError }}" style="margin-top:auto;height:40px;background:oklch(0.56 0.085 85);color:#14161a;border-radius:9px;display:flex;align-items:center;justify-content:center;gap:9px;font-size:14px;font-weight:700;cursor:pointer" style-hover="background:oklch(0.62 0.095 85)">
+                <div style="width:0;height:0;border-left:8px solid #14161a;border-top:5px solid transparent;border-bottom:5px solid transparent"></div>
+                Начать
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#15181b;border:1px solid #23272b;border-radius:10px;overflow:hidden;display:flex;flex-direction:column">
+            <div style="height:158px;background:#141719 url('https://picsum.photos/seed/weather-1997/640/360') center/cover no-repeat;position:relative">
+              <div style="position:absolute;left:10px;top:10px;background:oklch(0.80 0.13 145);color:#14161a;border-radius:6px;padding:3px 7px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500">готово 918</div>
+            </div>
+            <div style="flex:1;min-height:178px;padding:16px;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <div style="font-size:17px;font-weight:500">Прогноз погоды, 1997</div>
+                <div style="display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1;color:#8b9298">
+                  <span>archive.tv</span>
+                  <span style="color:#3a4045">·</span>
+                  <span>ru</span>
+                  <span style="color:#3a4045">·</span>
+                  <span style="display:flex;align-items:center;gap:6px" title="реплик">
+                    <span style="display:flex;flex-direction:column;gap:2px;width:10px">
+                      <span style="width:10px;height:1.5px;border-radius:99px;background:#6d757b"></span>
+                      <span style="width:7px;height:1.5px;border-radius:99px;background:#6d757b"></span>
+                      <span style="width:10px;height:1.5px;border-radius:99px;background:#6d757b"></span>
+                    </span>
+                    5
+                  </span>
+                </div>
+              </div>
+              <div style="display:flex;gap:5px;align-items:center">
+                <div style="width:22px;height:22px;border-radius:99px;background-image:repeating-linear-gradient(135deg,#2a2f34 0 4px,#20252a 4px 8px);border:2px solid oklch(0.80 0.13 145)"></div>
+              </div>
+              <div onClick="{{ goWatch }}" style="margin-top:auto;height:40px;background:oklch(0.80 0.13 145);color:#14161a;border-radius:9px;display:flex;align-items:center;justify-content:center;gap:9px;font-size:14px;font-weight:700;cursor:pointer" style-hover="background:oklch(0.86 0.13 145)">
+                <div style="width:0;height:0;border-left:8px solid #14161a;border-top:5px solid transparent;border-bottom:5px solid transparent"></div>
+                Смотреть дубляж
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#15181b;border:1px solid #23272b;border-radius:10px;overflow:hidden;display:flex;flex-direction:column">
+            <div style="height:158px;background:#141719 url('https://picsum.photos/seed/night-taxi/640/360') center/cover no-repeat;position:relative">
+              <div style="position:absolute;left:10px;top:10px;background:#0d0f11cc;border-radius:6px;padding:3px 7px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#cfd4d8">02:14</div>
+            </div>
+            <div style="flex:1;min-height:178px;padding:16px;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <div style="font-size:17px;font-weight:500">Ночное такси</div>
+                <div style="display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1;color:#8b9298">
+                  <span>kirsan</span>
+                  <span style="color:#3a4045">·</span>
+                  <span>en → ru</span>
+                  <span style="color:#3a4045">·</span>
+                  <span style="display:flex;align-items:center;gap:6px" title="реплик">
+                    <span style="display:flex;flex-direction:column;gap:2px;width:10px">
+                      <span style="width:10px;height:1.5px;border-radius:99px;background:#6d757b"></span>
+                      <span style="width:7px;height:1.5px;border-radius:99px;background:#6d757b"></span>
+                      <span style="width:10px;height:1.5px;border-radius:99px;background:#6d757b"></span>
+                    </span>
+                    18
+                  </span>
+                </div>
+              </div>
+              <div style="display:flex;gap:5px;align-items:center">
+                <div style="width:22px;height:22px;border-radius:99px;background-image:repeating-linear-gradient(135deg,#2a2f34 0 4px,#20252a 4px 8px);border:2px solid oklch(0.80 0.13 85)"></div>
+                <div style="width:22px;height:22px;border-radius:99px;background-image:repeating-linear-gradient(135deg,#2a2f34 0 4px,#20252a 4px 8px);border:2px solid oklch(0.80 0.13 145)"></div>
+                <div style="width:22px;height:22px;border-radius:99px;background-image:repeating-linear-gradient(135deg,#2a2f34 0 4px,#20252a 4px 8px);border:2px solid oklch(0.80 0.13 330)"></div>
+              </div>
+              <div onClick="{{ goRecord }}" style="margin-top:auto;position:relative;height:40px;background:oklch(0.56 0.085 85);border-radius:9px;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:9px;font-size:14px;font-weight:500;cursor:pointer">
+                <div style="position:absolute;left:0;top:0;bottom:0;width:78%;background:oklch(0.80 0.13 85)"></div>
+                <div style="position:relative;z-index:1;display:flex;align-items:center;gap:9px;font-weight:700;color:#14161a">
+                  <div style="width:0;height:0;border-left:8px solid #14161a;border-top:5px solid transparent;border-bottom:5px solid transparent"></div>
+                  Продолжить · 78%
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#15181b;border:1px solid #23272b;border-radius:10px;overflow:hidden;display:flex;flex-direction:column">
+            <div style="height:158px;background:#141719 url('https://picsum.photos/seed/kitchen-monologue/640/360') center/cover no-repeat;position:relative">
+              <div style="position:absolute;left:10px;top:10px;background:#0d0f11cc;border-radius:6px;padding:3px 7px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#cfd4d8">00:38</div>
+            </div>
+            <div style="flex:1;min-height:178px;padding:16px;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <div style="font-size:17px;font-weight:500">Монолог на кухне</div>
+                <div style="display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1;color:#8b9298">
+                  <span>lera.d</span>
+                  <span style="color:#3a4045">·</span>
+                  <span>ru</span>
+                  <span style="color:#3a4045">·</span>
+                  <span style="display:flex;align-items:center;gap:6px" title="реплик">
+                    <span style="display:flex;flex-direction:column;gap:2px;width:10px">
+                      <span style="width:10px;height:1.5px;border-radius:99px;background:#6d757b"></span>
+                      <span style="width:7px;height:1.5px;border-radius:99px;background:#6d757b"></span>
+                      <span style="width:10px;height:1.5px;border-radius:99px;background:#6d757b"></span>
+                    </span>
+                    4
+                  </span>
+                </div>
+              </div>
+              <div style="display:flex;gap:5px;align-items:center">
+                <div style="width:22px;height:22px;border-radius:99px;background-image:repeating-linear-gradient(135deg,#2a2f34 0 4px,#20252a 4px 8px);border:2px solid oklch(0.80 0.13 210)"></div>
+              </div>
+              <div onClick="{{ goRecord }}" style="margin-top:auto;height:40px;background:oklch(0.56 0.085 85);color:#14161a;border-radius:9px;display:flex;align-items:center;justify-content:center;gap:9px;font-size:14px;font-weight:700;cursor:pointer" style-hover="background:oklch(0.62 0.095 85)">
+                <div style="width:0;height:0;border-left:8px solid #14161a;border-top:5px solid transparent;border-bottom:5px solid transparent"></div>
+                Начать
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===== 02 Пустая библиотека ===== -->
+    <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="height:60px;flex:none;border-bottom:1px solid #1e2225;display:flex;align-items:center;justify-content:space-between;padding:0 28px">
+        <div onClick="{{ goLib }}" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;letter-spacing:.24em;color:oklch(0.80 0.13 85);cursor:pointer">ДУБЛЬ</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6d757b">без сервера · без учётной записи</div>
+      </div>
+      <div style="flex:1;min-height:0;overflow-y:auto;display:flex;align-items:center;justify-content:center;padding:48px 24px">
+        <div style="width:980px;max-width:100%;display:flex;flex-direction:column;gap:28px">
+          <div style="border:2px dashed #2c3136;border-radius:14px;padding:64px 48px;display:flex;flex-direction:column;align-items:center;gap:18px;background:#121517">
+            <div style="width:56px;height:56px;border:1px solid #2c3136;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:20px;color:oklch(0.80 0.13 85)">↓</div>
+            <div style="font-size:26px;font-weight:500;text-align:center">Добавьте первый пак</div>
+            <div style="font-size:15px;color:#9aa1a7;text-align:center;max-width:520px;text-wrap:pretty">Папку или архив: видео, фонограмма, персонажи, реплики. Игра сама разберётся в формате и оставит пак у вас.</div>
+            <div style="display:flex;gap:10px;margin-top:6px">
+              <div onClick="{{ goImport }}" style="background:oklch(0.80 0.13 85);color:#14161a;border-radius:8px;padding:11px 20px;font-size:14px;font-weight:500;cursor:pointer" style-hover="background:oklch(0.86 0.13 85)">Выбрать папку</div>
+              <div onClick="{{ goImport }}" style="border:1px solid #2c3136;color:#cfd4d8;border-radius:8px;padding:11px 20px;font-size:14px;font-weight:500;cursor:pointer" style-hover="border-color:#4a5158">Выбрать архив</div>
+            </div>
+          </div>
+          <div style="background:#15181b;border:1px solid #23272b;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:12px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6d757b">Где взять паки</div>
+            <div style="font-size:14px;color:#9aa1a7;line-height:1.55;text-wrap:pretty">Паки собирают и раздают сами игроки. Старые чужие форматы игра тоже узнаёт и приведёт к своему.</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <a href="#" style="border:1px solid #2c3136;border-radius:8px;padding:9px 14px;font-family:'JetBrains Mono',monospace;font-size:13px">dubpacks.io</a>
+              <a href="#" style="border:1px solid #2c3136;border-radius:8px;padding:9px 14px;font-family:'JetBrains Mono',monospace;font-size:13px">voiceover.club/packs</a>
+              <a href="#" style="border:1px solid #2c3136;border-radius:8px;padding:9px 14px;font-family:'JetBrains Mono',monospace;font-size:13px">archive.tv/dub</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===== 03 Импорт ===== -->
+    <sc-if value="{{ isImport }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#141719 0 10px,#111416 10px 20px);opacity:.5"></div>
+      <div style="position:fixed;inset:0;z-index:60;background:#0a0c0de6;display:flex;align-items:center;justify-content:center;padding:24px">
+        <div style="width:660px;max-width:calc(100vw - 48px);max-height:calc(100vh - 48px);overflow-y:auto;background:#15181b;border:1px solid #2c3136;border-radius:14px;padding:32px;display:flex;flex-direction:column;gap:24px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:22px;font-weight:500">Открываю пак «Ссора в лифте»</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b9298">ssora-v-lifte.zip · 214 МБ</div>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:oklch(0.80 0.13 85)">{{ importEta }}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:12px"><div style="width:18px;height:18px;border-radius:99px;background:oklch(0.80 0.13 145);color:#14161a;display:flex;align-items:center;justify-content:center;font-size:11px">✓</div><div style="font-size:14px;color:#cfd4d8">Прочитал описание — 12 реплик, 4 персонажа</div></div>
+            <div style="display:flex;align-items:center;gap:12px"><div style="width:18px;height:18px;border-radius:99px;background:oklch(0.80 0.13 145);color:#14161a;display:flex;align-items:center;justify-content:center;font-size:11px">✓</div><div style="font-size:14px;color:#cfd4d8">Проверил разметку реплик — всё в границах видео</div></div>
+            <div style="display:flex;align-items:center;gap:12px"><div style="width:18px;height:18px;border-radius:99px;border:2px solid oklch(0.80 0.13 85)"></div><div style="font-size:14px;color:#e9ebed">Привожу видео к тому, что играет браузер</div><div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b9298;margin-left:auto">{{ importPct }}</div></div>
+            <div style="height:6px;background:#23272b;border-radius:99px;overflow:hidden"><div style="width:{{ importPct }};height:100%;background:oklch(0.80 0.13 85);transition:width .4s linear"></div></div>
+            <div style="display:flex;align-items:center;gap:12px;opacity:.5"><div style="width:18px;height:18px;border-radius:99px;border:1px solid #3a4045"></div><div style="font-size:14px;color:#8b9298">Сохраняю пак на устройство</div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #23272b;padding-top:18px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6d757b">откроется дубль, когда закончу</div>
+            <div onClick="{{ goLib }}" style="border:1px solid #2c3136;color:#cfd4d8;border-radius:8px;padding:9px 16px;font-size:14px;cursor:pointer" style-hover="border-color:#4a5158">Отменить</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===== 04 Ошибка формата ===== -->
+    <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;z-index:60;background:#0a0c0de6;display:flex;align-items:center;justify-content:center;padding:24px">
+        <div style="width:760px;max-width:calc(100vw - 48px);max-height:calc(100vh - 48px);overflow-y:auto;background:#15181b;border:1px solid #2c3136;border-radius:14px;padding:32px;display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;gap:16px;align-items:flex-start">
+            <div style="width:34px;height:34px;flex:none;border-radius:8px;background:oklch(0.62 0.19 25);color:#14161a;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700">!</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:22px;font-weight:500">Пак не открылся</div>
+              <div style="font-size:14px;color:#9aa1a7">Две вещи мешают: одного файла нет, в другом непонятна разметка. Поправьте и положите пак снова.</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="border:1px solid #23272b;border-left:none;border-radius:10px;overflow:hidden;display:flex">
+              <div style="width:4px;background:oklch(0.62 0.19 25)"></div>
+              <div style="padding:16px 18px;display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font-size:15px;color:#e9ebed">Не найден файл видео</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b9298;line-height:1.7">pack.json → поле «video» → <span style="color:#cfd4d8">"clip.mkv"</span><br>в папке лежит только <span style="color:#cfd4d8">scene_final.mkv</span></div>
+                <div style="display:flex;gap:8px;margin-top:2px"><div onClick="{{ goImport }}" style="border:1px solid #2c3136;color:#cfd4d8;border-radius:7px;padding:7px 12px;font-size:13px;cursor:pointer" style-hover="border-color:#4a5158">Взять scene_final.mkv</div><div style="border:1px solid #2c3136;color:#cfd4d8;border-radius:7px;padding:7px 12px;font-size:13px;cursor:pointer" style-hover="border-color:#4a5158">Показать папку</div></div>
+              </div>
+            </div>
+            <div style="border:1px solid #23272b;border-left:none;border-radius:10px;overflow:hidden;display:flex">
+              <div style="width:4px;background:oklch(0.62 0.19 25)"></div>
+              <div style="padding:16px 18px;display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font-size:15px;color:#e9ebed">У реплики нет конца</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b9298;line-height:1.7">lines.json → строка 14 → реплика #6 «Да ты вообще слушаешь?»<br>поле <span style="color:#cfd4d8">"end"</span> пустое, а <span style="color:#cfd4d8">"start"</span> = 00:41.20</div>
+              </div>
+            </div>
+            <div style="border:1px solid #23272b;border-radius:10px;padding:14px 18px;display:flex;gap:12px;align-items:center">
+              <div style="width:18px;height:18px;border-radius:99px;background:oklch(0.80 0.13 145);color:#14161a;display:flex;align-items:center;justify-content:center;font-size:11px">✓</div>
+              <div style="font-size:14px;color:#9aa1a7">Остальное в порядке: фонограмма, 4 персонажа, 11 реплик из 12</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #23272b;padding-top:18px">
+            <div onClick="{{ goLib }}" style="border:1px solid #2c3136;color:#cfd4d8;border-radius:8px;padding:10px 18px;font-size:14px;cursor:pointer" style-hover="border-color:#4a5158">К библиотеке</div>
+            <div onClick="{{ goImport }}" style="background:oklch(0.80 0.13 85);color:#14161a;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:500;cursor:pointer" style-hover="background:oklch(0.86 0.13 85)">Попробовать снова</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===== 05 Запись ===== -->
+    <sc-if value="{{ isRecord }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:none;height:52px;border-bottom:1px solid #1e2225;display:flex;align-items:center;gap:16px;padding:0 22px">
+        <div onClick="{{ goLib }}" style="flex:none;font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b9298;cursor:pointer" style-hover="color:#e9ebed">← Библиотека</div>
+        <div style="flex:1;min-width:0;display:flex;align-items:center;gap:4px">
+          <sc-for list="{{ lines }}" as="line" hint-placeholder-count="12">
+            <div onClick="{{ line.pick }}" style="flex:1 1 6px;height:6px;border-radius:99px;background:{{ line.dot }};cursor:pointer" title="{{ line.text }}"></div>
+          </sc-for>
+        </div>
+        <div style="flex:none;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6d757b;white-space:nowrap">{{ sidebarLabel }}</div>
+        <div onClick="{{ goResults }}" style="flex:none;border:1px solid #2c3136;color:#cfd4d8;border-radius:8px;padding:6px 14px;font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer" style-hover="border-color:#4a5158">Свести и посмотреть итоги</div>
+        <div onClick="{{ openSettings }}" style="flex:none;width:32px;height:32px;border:1px solid #2c3136;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer" style-hover="border-color:#4a5158">
+          <div style="width:16px;height:1px;background:#8b9298;position:relative"><div style="position:absolute;left:4px;top:-2px;width:5px;height:5px;border-radius:99px;background:#8b9298"></div></div>
+          <div style="width:16px;height:1px;background:#8b9298;position:relative"><div style="position:absolute;left:9px;top:-2px;width:5px;height:5px;border-radius:99px;background:#8b9298"></div></div>
+        </div>
+      </div>
+
+      <div style="flex:1;min-height:0;overflow-y:auto;display:flex">
+        <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+          <div style="flex:1;min-height:340px;overflow:hidden;background:#0a0c0d;display:flex;align-items:center;justify-content:center;padding:12px">
+            <div style="aspect-ratio:16 / 9;height:100%;min-height:0;max-height:100%;max-width:100%;position:relative;overflow:hidden;border-radius:6px;background:#141719 url('https://picsum.photos/seed/elevator-quarrel/1280/720') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:clamp(18px,4vh,44px) 28px clamp(12px,2.5vh,26px)">
+              <div style="position:absolute;inset:0;background:linear-gradient(180deg,#0a0c0d99 0%,#0a0c0d33 40%,#0a0c0dd9 100%)"></div>
+              <div style="position:relative;z-index:1;flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:clamp(40px,8vh,96px);line-height:1;color:{{ centerColor }};text-shadow:0 4px 40px #0a0c0d">{{ centerBig }}</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:#e9ebed;background:#0a0c0dbf;border-radius:99px;padding:5px 12px">{{ centerHint }}</div>
+              </div>
+              <div style="position:relative;z-index:1;flex:none;display:flex;flex-direction:column;gap:10px;align-items:center">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.1em;color:{{ curColor }}">{{ curWho }}</div>
+                <div style="max-width:720px;text-align:center;font-size:clamp(18px,2.6vh,30px);font-weight:500;line-height:1.25;letter-spacing:-0.01em;text-shadow:0 2px 18px #0a0c0d;text-wrap:pretty">{{ curText }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="flex:none;border-top:1px solid #1e2225;padding:18px 32px 22px;display:flex;flex-direction:column;gap:18px;align-items:center">
+            <div style="width:100%;max-width:1180px;height:clamp(104px,16vh,150px);display:flex;gap:12px">
+            <div style="flex:1;min-width:0;height:100%;background:#15181b;border:1px solid #23272b;border-radius:12px;position:relative;overflow:hidden">
+              <div style="position:absolute;left:9%;width:80%;top:0;bottom:0;background:oklch(0.80 0.13 145);opacity:.07"></div>
+              <div style="position:absolute;left:9%;top:0;bottom:0;width:1px;background:oklch(0.80 0.13 145)"></div>
+              <div style="position:absolute;left:89%;top:0;bottom:0;width:1px;background:oklch(0.80 0.13 145)"></div>
+              <div style="position:absolute;left:0;width:9%;top:0;bottom:0;background:oklch(0.80 0.13 85);opacity:.08"></div>
+              <div style="position:absolute;right:12px;top:6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:oklch(0.80 0.13 145);white-space:nowrap">{{ curWindow }}</div>
+              <div style="position:absolute;left:16px;right:16px;top:22%;bottom:22%">
+                <div style="position:absolute;left:0;right:0;top:50%;height:1px;background:#2a2f34"></div>
+                <div style="position:absolute;inset:0;display:flex;align-items:center;gap:1px;opacity:.32">
+                  <sc-for list="{{ origWave }}" as="b" hint-placeholder-count="180">
+                    <div style="flex:1;min-width:3px;height:{{ b.peak }};min-height:2px;background:#8b9298"></div>
+                  </sc-for>
+                </div>
+                <div style="position:absolute;inset:0;display:flex;align-items:center;gap:1px">
+                  <sc-for list="{{ recWave }}" as="b" hint-placeholder-count="180">
+                    <div style="flex:1;min-width:1px;align-self:stretch;display:flex;align-items:center;justify-content:center">
+                      <div style="width:64%;min-width:3px;height:{{ b.peak }};min-height:2px;background:{{ b.cRms }};border-radius:1px"></div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="position:absolute;left:16px;bottom:8px;display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase">
+                <span style="display:flex;align-items:center;gap:6px;color:#8b9298"><span style="width:10px;height:3px;border-radius:99px;background:#6c757c"></span>оригинал</span>
+                <span style="display:flex;align-items:center;gap:6px;color:{{ recLegendColor }}"><span style="width:10px;height:3px;border-radius:99px;background:{{ recLegendColor }}"></span>{{ recLegend }}</span>
+              </div>
+              <div style="position:absolute;left:{{ playheadLeft }};top:0;bottom:0;width:2px;background:{{ playheadColor }}"></div>
+            </div>
+            </div>
+
+            <div style="width:100%;max-width:560px;display:grid;grid-template-columns:1fr 52px 1fr;align-items:center;gap:18px">
+              <div style="grid-column:1;display:flex;justify-content:flex-end;min-width:0">
+                <sc-if value="{{ recDone }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ goListen }}" style="width:52px;height:52px;border-radius:99px;border:1px solid #3a4045;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="border-color:#6d757b" title="прослушать что получилось">
+                    <div style="width:0;height:0;border-left:15px solid #e9ebed;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:4px"></div>
+                  </div>
+                </sc-if>
+              </div>
+              <sc-if value="{{ recDone }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ resetRec }}" style="grid-column:2;width:52px;height:52px;border-radius:99px;background:oklch(0.80 0.13 85);display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:oklch(0.86 0.13 85)" title="записать заново">
+                  <div style="position:relative;width:20px;height:20px">
+                    <div style="position:absolute;inset:0;border:2px solid #14161a;border-top-color:transparent;border-radius:99px"></div>
+                    <div style="position:absolute;right:-1px;top:-1px;width:0;height:0;border-left:8px solid #14161a;border-top:4px solid transparent;border-bottom:4px solid transparent"></div>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ recOrig }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ skipOrig }}" style="grid-column:2;width:52px;height:52px;border-radius:99px;border:1px solid #3a4045;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="border-color:#6d757b" title="пропустить оригинал">
+                  <div style="display:flex;align-items:center;gap:2px">
+                    <div style="width:0;height:0;border-left:9px solid #cfd4d8;border-top:6px solid transparent;border-bottom:6px solid transparent"></div>
+                    <div style="width:2px;height:12px;background:#cfd4d8"></div>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ recIdle }}" hint-placeholder-val="{{ true }}">
+                <div onClick="{{ startRec }}" style="grid-column:2;width:52px;height:52px;border-radius:99px;background:oklch(0.62 0.19 25);display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:oklch(0.68 0.19 25)" title="записать дубль">
+                  <div style="width:16px;height:16px;border-radius:99px;background:#14161a"></div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ recLive }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ stopRec }}" style="grid-column:2;width:52px;height:52px;border-radius:99px;background:oklch(0.62 0.19 25);display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:oklch(0.68 0.19 25)">
+                  <div style="width:15px;height:15px;background:#14161a;border-radius:2px"></div>
+                </div>
+              </sc-if>
+              <div style="grid-column:3;display:flex;justify-content:flex-start;min-width:0">
+                <sc-if value="{{ recDone }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ nextTake }}" style="width:52px;height:52px;border-radius:99px;background:oklch(0.80 0.13 85);display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:oklch(0.86 0.13 85)" title="{{ nextTakeLabel }}">
+                    <div style="display:flex;align-items:center;gap:2px">
+                      <div style="width:0;height:0;border-left:9px solid #14161a;border-top:6px solid transparent;border-bottom:6px solid transparent"></div>
+                      <div style="width:0;height:0;border-left:9px solid #14161a;border-top:6px solid transparent;border-bottom:6px solid transparent"></div>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </sc-if>
+
+    <!-- ===== 06 Прослушивание ===== -->
+    <sc-if value="{{ isListen }}" hint-placeholder-val="{{ false }}">
+      <div style="height:56px;flex:none;border-bottom:1px solid #1e2225;display:flex;align-items:center;justify-content:space-between;padding:0 22px">
+        <div style="display:flex;align-items:center;gap:18px">
+          <div onClick="{{ goLib }}" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b9298;cursor:pointer" style-hover="color:#e9ebed">← Библиотека</div>
+          <div style="width:1px;height:20px;background:#23272b"></div>
+          <div style="font-size:15px;font-weight:500">Ссора в лифте</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6d757b">{{ curLabel }} · дубль 2</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:8px;border:1px solid oklch(0.80 0.13 145);color:oklch(0.80 0.13 145);border-radius:99px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em">В ТОЧКУ · +0,08 с</div>
+          <div onClick="{{ openSettings }}" style="width:34px;height:34px;border:1px solid #2c3136;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer" style-hover="border-color:#4a5158">
+            <div style="width:16px;height:1px;background:#8b9298;position:relative"><div style="position:absolute;left:4px;top:-2px;width:5px;height:5px;border-radius:99px;background:#8b9298"></div></div>
+            <div style="width:16px;height:1px;background:#8b9298;position:relative"><div style="position:absolute;left:9px;top:-2px;width:5px;height:5px;border-radius:99px;background:#8b9298"></div></div>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;min-height:0">
+        <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+          <div style="flex:1;min-height:320px;background:#0a0c0d;display:flex;align-items:center;justify-content:center;padding:12px">
+            <div style="aspect-ratio:16 / 9;height:100%;min-height:0;max-height:100%;max-width:100%;position:relative;overflow:hidden;border-radius:6px;background:#141719 url('https://picsum.photos/seed/elevator-quarrel/1280/720') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:clamp(12px,2vh,20px)">
+              <div style="position:absolute;inset:0;background:linear-gradient(180deg,#0a0c0d80 0%,#0a0c0d26 40%,#0a0c0dd9 100%)"></div>
+              <div style="position:absolute;z-index:1;left:14px;top:12px;background:#0a0c0dbf;border-radius:99px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;color:{{ curColor }}">{{ curWho }}</div>
+              <div style="position:relative;z-index:1;max-width:640px;text-align:center;font-size:clamp(16px,2.2vh,24px);font-weight:500;line-height:1.3;text-shadow:0 2px 18px #0a0c0d;text-wrap:pretty">{{ curText }}</div>
+            </div>
+          </div>
+          <div style="flex:none;padding:22px;display:flex;flex-direction:column;gap:18px;min-height:0">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6d757b">Тайминг: окно реплики и мой дубль</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8b9298">слова другие — сравнивается только время</div>
+              </div>
+              <div style="height:clamp(96px,15vh,124px);background:#15181b;border:1px solid #23272b;border-radius:10px;position:relative;overflow:hidden">
+                <div style="position:absolute;left:9%;width:80%;top:0;bottom:0;background:oklch(0.80 0.13 145);opacity:.07"></div>
+                <div style="position:absolute;left:9%;top:0;bottom:0;width:1px;background:oklch(0.80 0.13 145)"></div>
+                <div style="position:absolute;left:9%;top:6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:oklch(0.80 0.13 145);padding-left:6px">00:41.20 — начало по разметке</div>
+                <div style="position:absolute;left:89%;top:0;bottom:0;width:1px;background:oklch(0.80 0.13 145)"></div>
+                <div style="position:absolute;left:89%;top:6px;transform:translateX(-100%);padding-right:6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:oklch(0.80 0.13 145);white-space:nowrap">00:44.05</div>
+                <div style="position:absolute;left:11.4%;top:0;bottom:0;width:1px;background:#e9ebed;opacity:.6"></div>
+                <div style="position:absolute;left:9%;width:2.4%;top:0;bottom:0;background:oklch(0.80 0.13 85);opacity:.25"></div>
+                <div style="position:absolute;left:89%;width:4.6%;top:0;bottom:0;background:oklch(0.62 0.19 25);opacity:.22"></div>
+                <div style="position:absolute;left:12px;right:12px;top:26px;bottom:24px">
+                  <div style="position:absolute;left:0;right:0;top:50%;height:1px;background:#2a2f34"></div>
+                  <div style="position:absolute;inset:0;display:flex;align-items:center;gap:1px;opacity:.32">
+                    <sc-for list="{{ origWave }}" as="b" hint-placeholder-count="180">
+                      <div style="flex:1;min-width:3px;height:{{ b.peak }};min-height:2px;background:#8b9298"></div>
+                    </sc-for>
+                  </div>
+                  <div style="position:absolute;inset:0;display:flex;align-items:center;gap:1px">
+                    <sc-for list="{{ mineWave }}" as="b" hint-placeholder-count="180">
+                      <div style="flex:1;min-width:1px;align-self:stretch;display:flex;align-items:center;justify-content:center">
+                        <div style="width:64%;min-width:3px;height:{{ b.peak }};min-height:2px;background:{{ b.cRms }};border-radius:1px"></div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="position:absolute;left:14px;bottom:8px;display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase">
+                  <span style="display:flex;align-items:center;gap:6px;color:#8b9298"><span style="width:10px;height:3px;border-radius:99px;background:#6c757c"></span>оригинал (en)</span>
+                  <span style="display:flex;align-items:center;gap:6px;color:oklch(0.80 0.13 210)"><span style="width:10px;height:3px;border-radius:99px;background:oklch(0.80 0.13 210)"></span>мой дубль (ru)</span>
+                </div>
+              </div>
+              <div style="display:flex;gap:18px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8b9298">
+                <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:2px;background:oklch(0.80 0.13 210)"></div>речь в окне</div>
+                <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:2px;background:oklch(0.62 0.19 25)"></div>заехал за конец на 0,26 с</div>
+                <div style="margin-left:auto">заполнено 88% окна · длина +6%</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:center;margin-top:auto;flex-wrap:wrap">
+              <div style="width:46px;height:46px;flex:none;border-radius:99px;background:oklch(0.80 0.13 85);display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:oklch(0.86 0.13 85)">
+                <div style="width:0;height:0;border-left:14px solid #14161a;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:3px"></div>
+              </div>
+              <div onClick="{{ goRecord }}" style="display:flex;align-items:center;gap:9px;height:40px;padding:0 16px;border:1px solid #2c3136;border-radius:9px;color:#cfd4d8;font-size:14px;font-weight:500;cursor:pointer" style-hover="border-color:#4a5158">
+                <div style="width:11px;height:11px;border-radius:99px;background:oklch(0.62 0.19 25)"></div>
+                Переписать
+              </div>
+              <div style="display:flex;align-items:center;gap:9px;height:40px;padding:0 16px;border:1px solid #2c3136;border-radius:9px;color:#cfd4d8;font-size:14px;font-weight:500;cursor:pointer" style-hover="border-color:#4a5158">
+                <div style="width:0;height:0;border-left:8px solid #8b9298;border-top:5px solid transparent;border-bottom:5px solid transparent"></div>
+                Оригинал
+              </div>
+              <div onClick="{{ nextTake }}" style="margin-left:auto;display:flex;align-items:center;gap:10px;height:40px;padding:0 18px;background:oklch(0.80 0.13 85);color:#14161a;border-radius:9px;font-size:14px;font-weight:500;cursor:pointer" style-hover="background:oklch(0.86 0.13 85)">
+                {{ nextTakeLabel }}
+                <div style="width:0;height:0;border-left:8px solid #14161a;border-top:5px solid transparent;border-bottom:5px solid transparent"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="flex:0 1 392px;min-width:230px;border-left:1px solid #1e2225;display:flex;flex-direction:column;padding:18px;gap:18px">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6d757b">Что слушать</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="background:#15181b;border:1px solid #23272b;border-radius:9px;padding:12px 14px;display:flex;flex-direction:column;gap:9px">
+                <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:14px">Фонограмма</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:oklch(0.80 0.13 85)">вкл · 80%</div></div>
+                <div style="height:4px;background:#23272b;border-radius:99px"><div style="width:80%;height:100%;background:oklch(0.80 0.13 85);border-radius:99px"></div></div>
+              </div>
+              <div style="background:#15181b;border:1px solid #23272b;border-radius:9px;padding:12px 14px;display:flex;flex-direction:column;gap:9px">
+                <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:14px;color:#8b9298">Оригинал (en) — образец укладки</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6d757b">выкл</div></div>
+                <div style="height:4px;background:#23272b;border-radius:99px"><div style="width:35%;height:100%;background:#3a4045;border-radius:99px"></div></div>
+              </div>
+              <div style="background:#15181b;border:1px solid oklch(0.80 0.13 210);border-radius:9px;padding:12px 14px;display:flex;flex-direction:column;gap:9px">
+                <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:14px">Мой дубль</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:oklch(0.80 0.13 210)">вкл · 100%</div></div>
+                <div style="height:4px;background:#23272b;border-radius:99px"><div style="width:100%;height:100%;background:oklch(0.80 0.13 210);border-radius:99px"></div></div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6d757b">Разбор дубля</div>
+            <div style="background:#15181b;border:1px solid #23272b;border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:'JetBrains Mono',monospace;font-size:34px;color:oklch(0.80 0.13 145)">92</div><div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#6d757b">из 100</div></div>
+              <div style="display:flex;flex-direction:column;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12px">
+                <div style="display:flex;justify-content:space-between"><span style="color:#8b9298">начало</span><span style="color:oklch(0.80 0.13 145)">+0,08 с — в точку</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:#8b9298">длительность</span><span style="color:#cfd4d8">3,03 с при 2,85 — +6%</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:#8b9298">за окном</span><span style="color:oklch(0.62 0.19 25)">0,26 с после конца</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:#8b9298">дублей записано</span><span style="color:#cfd4d8">2</span></div>
+              </div>
+            </div>
+          </div>
+          <div onClick="{{ goResults }}" style="margin-top:auto;border:1px solid #2c3136;color:#cfd4d8;border-radius:8px;padding:11px 0;text-align:center;font-size:13px;font-weight:500;cursor:pointer" style-hover="border-color:#4a5158">Свести и посмотреть итоги</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===== 08 Итоги ===== -->
+    <sc-if value="{{ isResults }}" hint-placeholder-val="{{ false }}">
+      <div style="height:56px;flex:none;border-bottom:1px solid #1e2225;display:flex;align-items:center;justify-content:space-between;padding:0 22px">
+        <div style="display:flex;align-items:center;gap:18px"><div onClick="{{ goLib }}" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b9298;cursor:pointer" style-hover="color:#e9ebed">← Библиотека</div><div style="width:1px;height:20px;background:#23272b"></div><div style="font-size:15px;font-weight:500">Ссора в лифте · итоги</div></div>
+        <div style="display:flex;gap:10px">
+          <div onClick="{{ goRecord }}" style="border:1px solid #2c3136;color:#cfd4d8;border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer" style-hover="border-color:#4a5158">Вернуться к репликам</div>
+          <div onClick="{{ goWatch }}" style="background:oklch(0.80 0.13 85);color:#14161a;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer" style-hover="background:oklch(0.86 0.13 85)">Смотреть дубляж</div>
+        </div>
+      </div>
+      <div style="flex:1;min-height:0;overflow-y:auto;padding:32px;display:flex;flex-wrap:wrap;gap:28px;align-content:flex-start">
+        <div style="flex:1 1 340px;max-width:100%;display:flex;flex-direction:column;gap:20px">
+          <div style="background:#15181b;border:1px solid #23272b;border-radius:12px;padding:28px;display:flex;flex-direction:column;gap:20px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6d757b">Счёт</div>
+            <div style="display:flex;align-items:baseline;gap:10px"><div style="font-family:'JetBrains Mono',monospace;font-size:76px;line-height:.9;color:oklch(0.80 0.13 85)">842</div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;color:#6d757b">/ 1000</div></div>
+            <div style="height:8px;background:#23272b;border-radius:99px;overflow:hidden"><div style="width:84%;height:100%;background:oklch(0.80 0.13 85)"></div></div>
+            <div style="display:flex;flex-direction:column;gap:10px;font-family:'JetBrains Mono',monospace;font-size:12px">
+              <div style="display:flex;justify-content:space-between"><span style="color:#8b9298">точность</span><span style="color:#e9ebed">84%</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:#8b9298">средний промах старта</span><span style="color:#e9ebed">0,14 с</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:#8b9298">записано дублей</span><span style="color:#e9ebed">19 на 12 реплик</span></div>
+            </div>
+          </div>
+          <div style="background:#15181b;border:1px solid #23272b;border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:14px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6d757b">Вердикты</div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:66px;font-family:'JetBrains Mono',monospace;font-size:11px;color:oklch(0.80 0.13 145)">в точку</div><div style="flex:1;height:10px;background:#23272b;border-radius:3px;overflow:hidden"><div style="width:58%;height:100%;background:oklch(0.80 0.13 145)"></div></div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8b9298">7</div></div>
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:66px;font-family:'JetBrains Mono',monospace;font-size:11px;color:oklch(0.80 0.13 85)">поздно</div><div style="flex:1;height:10px;background:#23272b;border-radius:3px;overflow:hidden"><div style="width:17%;height:100%;background:oklch(0.80 0.13 85)"></div></div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8b9298">2</div></div>
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:66px;font-family:'JetBrains Mono',monospace;font-size:11px;color:oklch(0.80 0.13 85)">коротко</div><div style="flex:1;height:10px;background:#23272b;border-radius:3px;overflow:hidden"><div style="width:17%;height:100%;background:oklch(0.80 0.13 85)"></div></div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8b9298">2</div></div>
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:66px;font-family:'JetBrains Mono',monospace;font-size:11px;color:oklch(0.62 0.19 25)">тишина</div><div style="flex:1;height:10px;background:#23272b;border-radius:3px;overflow:hidden"><div style="width:8%;height:100%;background:oklch(0.62 0.19 25)"></div></div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8b9298">1</div></div>
+            </div>
+            <div style="font-size:13px;color:#8b9298;line-height:1.5;text-wrap:pretty">Слабое место — реплики короче секунды: их вы начинаете позже, чем длинные.</div>
+          </div>
+        </div>
+        <div style="flex:1 1 560px;min-width:0;min-height:420px;background:#15181b;border:1px solid #23272b;border-radius:12px;overflow:auto;display:flex;flex-direction:column">
+          <div style="display:flex;min-width:700px;padding:14px 20px;border-bottom:1px solid #23272b;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6d757b">
+            <div style="width:34px;flex:none">№</div><div style="flex:1;min-width:220px">Реплика</div><div style="width:110px;flex:none">Начало</div><div style="width:110px;flex:none">Длина</div><div style="width:110px;flex:none">Вердикт</div><div style="width:60px;flex:none;text-align:right">Балл</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+            <sc-for list="{{ results }}" as="r" hint-placeholder-count="12">
+              <div onClick="{{ r.retake }}" style="display:flex;align-items:center;min-width:700px;padding:12px 20px;border-bottom:1px solid #191d20;cursor:pointer" style-hover="background:#191d20">
+                <div style="width:34px;flex:none;font-family:'JetBrains Mono',monospace;font-size:12px;color:#6d757b">{{ r.num }}</div>
+                <div style="flex:1;display:flex;align-items:center;gap:10px;min-width:220px">
+                  <div style="width:24px;height:24px;flex:none;border-radius:99px;background-image:repeating-linear-gradient(135deg,#2a2f34 0 4px,#20252a 4px 8px);border:2px solid {{ r.color }}"></div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:{{ r.color }};width:66px;flex:none">{{ r.who }}</div>
+                  <div style="font-size:13px;color:#cfd4d8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.text }}</div>
+                </div>
+                <div style="width:110px;flex:none;font-family:'JetBrains Mono',monospace;font-size:12px;color:#9aa1a7">{{ r.start }}</div>
+                <div style="width:110px;flex:none;font-family:'JetBrains Mono',monospace;font-size:12px;color:#9aa1a7">{{ r.dur }}</div>
+                <div style="width:110px;flex:none"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;border:1px solid {{ r.vColor }};color:{{ r.vColor }};border-radius:99px;padding:3px 9px">{{ r.verdict }}</span></div>
+                <div style="width:60px;flex:none;text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;color:{{ r.vColor }}">{{ r.score }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding:14px 20px;border-top:1px solid #23272b;font-family:'JetBrains Mono',monospace;font-size:11px;color:#6d757b">нажмите на реплику, чтобы переписать её</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===== 09 Просмотр ===== -->
+    <sc-if value="{{ isWatch }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;min-height:420px;background:#000;display:grid;place-items:center;overflow:hidden">
+        <div style="width:100%;max-width:calc(100vh * 16 / 9);aspect-ratio:16 / 9;max-height:100%;position:relative;overflow:hidden;background:#141719 url('https://picsum.photos/seed/elevator-quarrel/1280/720') center/cover no-repeat">
+
+          <div style="position:absolute;z-index:2;left:0;right:0;top:0;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(180deg,#0a0c0dcc 0%,#0a0c0d00 100%)">
+            <div style="display:flex;align-items:center;gap:14px;min-width:0">
+              <div onClick="{{ goResults }}" style="flex:none;width:34px;height:34px;border-radius:99px;background:#0a0c0d99;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:#0a0c0dd9" title="к итогам">
+                <div style="width:0;height:0;border-right:8px solid #e9ebed;border-top:5px solid transparent;border-bottom:5px solid transparent"></div>
+              </div>
+              <div style="font-size:15px;font-weight:500;white-space:nowrap;text-shadow:0 1px 8px #0a0c0d">Ссора в лифте · ваш дубляж</div>
+            </div>
+            <div onClick="{{ goExport }}" style="flex:none;background:oklch(0.80 0.13 85);color:#14161a;border-radius:8px;padding:8px 15px;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer" style-hover="background:oklch(0.86 0.13 85)">Забрать работу</div>
+          </div>
+
+          <div style="position:absolute;z-index:1;left:0;right:0;bottom:0;height:56%;background:linear-gradient(180deg,#0a0c0d00 0%,#0a0c0dd9 72%,#0a0c0df2 100%)"></div>
+
+          <div style="position:absolute;z-index:2;left:0;right:0;bottom:96px;display:flex;justify-content:center;padding:0 8%">
+            <div style="text-align:center;font-size:clamp(18px,2.8vh,30px);font-weight:500;line-height:1.3;text-shadow:0 2px 18px #0a0c0d;text-wrap:pretty">Я не про лифт. Я про то, что ты не слышишь.</div>
+          </div>
+
+          <div style="position:absolute;z-index:3;left:0;right:0;bottom:0;padding:0 20px 18px;display:flex;flex-direction:column;gap:10px">
+            <div style="height:26px;position:relative;border-radius:5px;overflow:hidden;background:#e9ebed1a;cursor:pointer">
+              <sc-for list="{{ clips }}" as="c" hint-placeholder-count="12">
+                <div style="position:absolute;top:7px;bottom:7px;left:{{ c.left }};width:{{ c.width }};background:{{ c.color }};opacity:.9;border-radius:2px" title="дубль"></div>
+              </sc-for>
+              <div style="position:absolute;left:0;top:0;bottom:0;width:48%;background:#e9ebed14"></div>
+              <div style="position:absolute;left:48%;top:0;bottom:0;width:2px;background:#e9ebed"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px">
+              <div style="width:44px;height:44px;flex:none;border-radius:99px;background:#e9ebed;display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer" style-hover="background:#fff">
+                <div style="width:4px;height:15px;background:#14161a;border-radius:1px"></div>
+                <div style="width:4px;height:15px;background:#14161a;border-radius:1px"></div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#e9ebed">00:52.40 <span style="color:#8b9298">/ 01:48.00</span></div>
+              <div style="flex:1"></div>
+              <div style="display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase">
+                <div style="background:#e9ebed;color:#14161a;border-radius:99px;padding:6px 12px;cursor:pointer">мои дубли</div>
+                <div style="background:#0a0c0d99;color:#cfd4d8;border-radius:99px;padding:6px 12px;cursor:pointer">фонограмма</div>
+                <div style="background:#0a0c0d99;color:#6d757b;border-radius:99px;padding:6px 12px;cursor:pointer">оригинал</div>
+                <div style="background:#0a0c0d99;color:#cfd4d8;border-radius:99px;padding:6px 12px;cursor:pointer">субтитры</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===== 10 Экспорт ===== -->
+    <sc-if value="{{ isExport }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#141719 0 10px,#111416 10px 20px);opacity:.5"></div>
+      <div style="position:fixed;inset:0;z-index:60;background:#0a0c0de6;display:flex;align-items:center;justify-content:center;padding:24px">
+        <div style="width:720px;max-width:calc(100vw - 48px);max-height:calc(100vh - 48px);overflow-y:auto;background:#15181b;border:1px solid #2c3136;border-radius:14px;padding:32px;display:flex;flex-direction:column;gap:24px">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:22px;font-weight:500">Забрать работу</div>
+            <div style="font-size:14px;color:#9aa1a7">Файлы сохраняются на ваш диск. Дубляж отдельно — чтобы вернуться и доделать.</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="border:1px solid oklch(0.80 0.13 85);border-radius:10px;padding:18px;display:flex;gap:14px;align-items:flex-start">
+              <div style="width:18px;height:18px;flex:none;border-radius:5px;background:oklch(0.80 0.13 85);color:#14161a;display:flex;align-items:center;justify-content:center;font-size:11px;margin-top:2px">✓</div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:16px;font-weight:500">Видео с новой звуковой дорожкой</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8b9298">≈ 96 МБ · mp4</div></div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:12px"><span style="color:#cfd4d8">{{ mixLabel }}</span><span style="color:oklch(0.80 0.13 85)">{{ mixEta }}</span></div>
+                  <div style="height:6px;background:#23272b;border-radius:99px;overflow:hidden"><div style="width:{{ mixPct }};height:100%;background:oklch(0.80 0.13 85);transition:width .4s linear"></div></div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6d757b">сборка идёт на вашем устройстве — не закрывайте вкладку</div>
+                </div>
+              </div>
+            </div>
+            <div style="border:1px solid #2c3136;border-radius:10px;padding:18px;display:flex;gap:14px;align-items:flex-start;cursor:pointer">
+              <div style="width:18px;height:18px;flex:none;border-radius:5px;border:1px solid #3a4045;margin-top:2px"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:16px;font-weight:500">Только дубляж — записи с таймкодами</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8b9298">≈ 11 МБ · zip</div></div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b9298">12 файлов wav + takes.json с началом и концом каждого дубля</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;border-top:1px solid #23272b;padding-top:18px">
+            <div onClick="{{ goWatch }}" style="border:1px solid #2c3136;color:#cfd4d8;border-radius:8px;padding:10px 18px;font-size:14px;cursor:pointer" style-hover="border-color:#4a5158">{{ cancelLabel }}</div>
+            <div style="background:{{ dlBg }};color:{{ dlColor }};border-radius:8px;padding:10px 18px;font-size:14px;font-weight:500;cursor:pointer">{{ dlLabel }}</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===== 07 Настройки (модалка) ===== -->
+    <sc-if value="{{ settingsOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;z-index:70;background:#0a0c0de6;display:flex;align-items:center;justify-content:center;padding:24px">
+        <div style="width:1040px;max-width:calc(100vw - 48px);max-height:calc(100vh - 48px);background:#15181b;border:1px solid #2c3136;border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="height:62px;flex:none;border-bottom:1px solid #23272b;display:flex;align-items:center;justify-content:space-between;padding:0 24px">
+            <div style="display:flex;align-items:center;gap:14px">
+              <div style="font-size:19px;font-weight:500">Настройки</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6d757b">запоминаются между запусками</div>
+            </div>
+            <div onClick="{{ closeSettings }}" style="width:34px;height:34px;border:1px solid #2c3136;border-radius:9px;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer" style-hover="border-color:#4a5158">
+              <div style="position:absolute;width:14px;height:1px;background:#8b9298;transform:rotate(45deg)"></div>
+              <div style="position:absolute;width:14px;height:1px;background:#8b9298;transform:rotate(-45deg)"></div>
+            </div>
+          </div>
+          <div style="flex:1;min-height:0;overflow-y:auto;padding:24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;align-content:start">
+            <div style="background:#191d20;border:1px solid #23272b;border-radius:10px;padding:22px;display:flex;flex-direction:column;gap:22px">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#8b9298">Микрофон</div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6d757b">Устройство</div>
+                <div style="border:1px solid #2c3136;border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-size:14px;cursor:pointer"><span>USB Podmic — Внешний</span><span style="color:#8b9298;font-size:11px">▾</span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;justify-content:space-between"><div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6d757b">Усиление входа</div><div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#cfd4d8">+6 дБ</div></div>
+                <div style="height:4px;background:#23272b;border-radius:99px;position:relative"><div style="width:58%;height:100%;background:oklch(0.80 0.13 85);border-radius:99px"></div><div style="position:absolute;left:58%;top:-6px;width:16px;height:16px;margin-left:-8px;border-radius:99px;background:#e9ebed"></div></div>
+                <div style="display:flex;align-items:center;gap:12px;margin-top:6px">
+                  <div style="flex:1;height:14px;background:#101315;border:1px solid #23272b;border-radius:4px;overflow:hidden;display:flex">
+                    <div style="width:62%;background:oklch(0.80 0.13 145)"></div><div style="width:9%;background:oklch(0.80 0.13 85)"></div>
+                  </div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:oklch(0.80 0.13 145)">−9 дБ · норма</div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #23272b;padding-top:18px">
+                <div style="display:flex;flex-direction:column;gap:4px"><div style="font-size:14px">Обработка браузера</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6d757b">шумодав и автоуровень — выключите для чистого голоса</div></div>
+                <div onClick="{{ toggleDsp }}" style="width:44px;height:24px;border-radius:99px;background:{{ dspTrack }};position:relative;flex:none;cursor:pointer"><div style="position:absolute;left:{{ dspKnobLeft }};top:3px;width:18px;height:18px;border-radius:99px;background:{{ dspKnob }}"></div></div>
+              </div>
+            </div>
+            <div style="background:#191d20;border:1px solid #23272b;border-radius:10px;padding:22px;display:flex;flex-direction:column;gap:20px">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#8b9298">Дубль</div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;justify-content:space-between"><div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6d757b">Разбег перед репликой</div><div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#cfd4d8">3,0 с</div></div>
+                <div style="height:4px;background:#23272b;border-radius:99px;position:relative"><div style="width:60%;height:100%;background:oklch(0.80 0.13 85);border-radius:99px"></div><div style="position:absolute;left:60%;top:-6px;width:16px;height:16px;margin-left:-8px;border-radius:99px;background:#e9ebed"></div></div>
+                <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:11px;color:#6d757b"><span>0 — запись сразу</span><span>5 с</span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;justify-content:space-between"><div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6d757b">Хвост после реплики</div><div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#cfd4d8">0,4 с</div></div>
+                <div style="height:4px;background:#23272b;border-radius:99px;position:relative"><div style="width:27%;height:100%;background:oklch(0.80 0.13 85);border-radius:99px"></div><div style="position:absolute;left:27%;top:-6px;width:16px;height:16px;margin-left:-8px;border-radius:99px;background:#e9ebed"></div></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:14px;border-top:1px solid #23272b;padding-top:18px">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:14px">Тики отсчёта</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6d757b">щёлкает на каждой секунде разбега</div></div>
+                  <div onClick="{{ toggleTicks }}" style="width:44px;height:24px;border-radius:99px;background:{{ ticksTrack }};position:relative;flex:none;cursor:pointer"><div style="position:absolute;left:{{ ticksKnobLeft }};top:3px;width:18px;height:18px;border-radius:99px;background:{{ ticksKnob }}"></div></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:14px">Сам переходить к следующей</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6d757b">после дубля, без подтверждения</div></div>
+                  <div onClick="{{ toggleAuto }}" style="width:44px;height:24px;border-radius:99px;background:{{ autoTrack }};position:relative;flex:none;cursor:pointer"><div style="position:absolute;left:{{ autoKnobLeft }};top:3px;width:18px;height:18px;border-radius:99px;background:{{ autoKnob }}"></div></div>
+                </div>
+              </div>
+            </div>
+            <div style="grid-column:1 / -1;background:#191d20;border:1px solid #23272b;border-radius:10px;padding:18px 22px;display:flex;align-items:center;justify-content:space-between">
+              <div style="display:flex;gap:40px">
+                <div style="display:flex;flex-direction:column;gap:4px"><div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6d757b">Место на устройстве</div><div style="font-size:14px">1,2 ГБ · 3 пака, 41 дубль</div></div>
+                <div style="display:flex;flex-direction:column;gap:4px"><div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6d757b">Доступ к микрофону</div><div style="font-size:14px;color:oklch(0.80 0.13 145)">разрешён</div></div>
+              </div>
+              <div style="display:flex;gap:10px">
+                <div style="border:1px solid #2c3136;color:#cfd4d8;border-radius:9px;padding:10px 16px;font-size:13px;cursor:pointer" style-hover="border-color:#4a5158">Сбросить настройки</div>
+                <div onClick="{{ closeSettings }}" style="background:oklch(0.80 0.13 85);color:#14161a;border-radius:9px;padding:10px 18px;font-size:13px;font-weight:500;cursor:pointer" style-hover="background:oklch(0.86 0.13 85)">Готово</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <!-- переключатель экранов -->
+  <sc-if value="{{ showSwitcher }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:none;height:52px;border-top:1px solid #1e2225;background:#0d0f11;display:flex;align-items:center;gap:8px;padding:0 20px;overflow-x:auto">
+      <div style="flex:none;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6d757b;margin-right:4px">Экраны</div>
+      <sc-for list="{{ screenNav }}" as="n" hint-placeholder-count="10">
+        <div onClick="{{ n.go }}" style="flex:none;border:1px solid {{ n.border }};background:{{ n.bg }};color:{{ n.color }};border-radius:99px;padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;white-space:nowrap;cursor:pointer" style-hover="border-color:#4a5158">{{ n.label }}</div>
+      </sc-for>
+      <div style="margin-left:auto;flex:none;padding-left:16px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#6d757b;white-space:nowrap">{{ hint }}</div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showSwitcher&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Демка&quot;},&quot;showHints&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Демка&quot;}}">
+const C = {
+  gleb: 'oklch(0.80 0.13 210)', mira: 'oklch(0.80 0.13 85)',
+  diktor: 'oklch(0.80 0.13 330)', sosed: 'oklch(0.80 0.13 145)',
+  good: 'oklch(0.80 0.13 145)', warn: 'oklch(0.80 0.13 85)', bad: 'oklch(0.62 0.19 25)', dim: '#6d757b'
+};
+
+const RAW = [
+  ['01','ДИКТОР',C.diktor,'00:04.10','Осторожно, двери закрываются.'],
+  ['02','ГЛЕБ',C.gleb,'00:09.80','Ты нажала минус первый?'],
+  ['03','МИРА',C.mira,'00:14.60','Я нажала то, что ты просил.'],
+  ['04','ГЛЕБ',C.gleb,'00:22.05','Я просил парковку, а не подвал.'],
+  ['05','СОСЕД',C.sosed,'00:33.40','Простите, вам на какой?'],
+  ['06','ГЛЕБ',C.gleb,'00:41.20','Да ты вообще слушаешь? Я третий раз про это говорю.'],
+  ['07','МИРА',C.mira,'00:45.90','Я слышу. Мне просто нечего сказать.'],
+  ['08','ГЛЕБ',C.gleb,'00:52.30','Я не про лифт. Я про то, что ты не слышишь.'],
+  ['09','ДИКТОР',C.diktor,'01:02.00','Технический этаж.'],
+  ['10','СОСЕД',C.sosed,'01:09.75','Я, пожалуй, пешком.'],
+  ['11','МИРА',C.mira,'01:21.40','Останови на первом.'],
+  ['12','ГЛЕБ',C.gleb,'01:33.10','Хорошо. Как хочешь.']
+];
+
+const VERDICTS = [
+  ['в точку',C.good,92],['в точку',C.good,88],['рано',C.warn,61],['в точку',C.good,95],
+  ['коротко',C.warn,70],['в точку',C.good,92],['поздно',C.warn,54],['в точку',C.good,90],
+  ['тишина',C.bad,0],['в точку',C.good,84],['коротко',C.warn,66],['в точку',C.good,87]
+];
+
+const HINTS = {
+  lib: 'нажмите «Продолжить» — начнётся дубль',
+  empty: 'первый запуск: паков ещё нет',
+  imp: 'откроется дубль, когда пак разберётся',
+  err: 'пак «Допрос под дождём» собран с ошибками',
+  rec: 'R или «Записать дубль» → стоп → следующая реплика',
+  listen: 'переписать или следующая реплика',
+  res: 'нажмите на реплику, чтобы переписать',
+  watch: '«Забрать работу» → сборка файлов',
+  exp: 'сборка идёт на устройстве'
+};
+
+class Component extends DCLogic {
+  state = { screen: 'lib', cur: 5, settings: false, imp: 0, mix: 40, dsp: false, ticks: true, auto: false, rec: 'idle', prog: 0 };
+
+  componentWillUnmount() { clearInterval(this._t); clearInterval(this._r); window.removeEventListener('keydown', this._key); }
+
+  componentDidMount() {
+    clearInterval(this._r);
+    this._r = setInterval(() => this.setState(s => {
+      if (s.screen !== 'rec') return null;
+      if (s.rec === 'orig') return s.prog >= 100 ? { rec: 'idle', prog: 0 } : { prog: Math.min(100, s.prog + 5) };
+      if (s.rec === 'live') return s.prog >= 100 ? { rec: 'done', prog: 100 } : { prog: Math.min(100, s.prog + 4) };
+      if (s.rec === 'play') return s.prog >= 100 ? { rec: 'done', prog: 100 } : { prog: Math.min(100, s.prog + 6) };
+      return null;
+    }), 110);
+    this._key = e => {
+      if (this.state.screen !== 'rec' || this.state.settings) return;
+      if (e.key === 'r' || e.key === 'R' || e.key === 'к' || e.key === 'К') {
+        e.preventDefault();
+        this.state.rec === 'live' ? this.stopRec() : this.startRec();
+      }
+    };
+    window.addEventListener('keydown', this._key);
+  }
+
+  startRec = () => this.setState({ screen: 'rec', settings: false, rec: 'live', prog: 0 });
+  stopRec = () => this.setState({ rec: 'done' });
+  resetRec = () => this.playOrig();
+  playOrig = patch => this.setState(Object.assign({ screen: 'rec', settings: false, rec: 'orig', prog: 0 }, patch || {}));
+  skipOrig = () => this.setState({ rec: 'idle', prog: 0 });
+  playTake = () => this.setState({ rec: 'play', prog: 0 });
+
+  tick(kind) {
+    clearInterval(this._t);
+    this._t = setInterval(() => {
+      if (kind === 'imp') {
+        this.setState(s => {
+          if (s.screen !== 'imp') { clearInterval(this._t); return {}; }
+          if (s.imp >= 100) { clearInterval(this._t); return { screen: 'rec', imp: 0 }; }
+          return { imp: Math.min(100, s.imp + 12) };
+        });
+      } else {
+        this.setState(s => {
+          if (s.screen !== 'exp') { clearInterval(this._t); return {}; }
+          if (s.mix >= 100) { clearInterval(this._t); return { mix: 100 }; }
+          return { mix: Math.min(100, s.mix + 6) };
+        });
+      }
+    }, 420);
+  }
+
+  go(screen) {
+    if (screen === 'rec') return () => this.playOrig();
+    return () => {
+      clearInterval(this._t);
+      const patch = { screen, settings: false };
+      if (screen === 'imp') patch.imp = 0;
+      if (screen === 'exp') patch.mix = 40;
+      this.setState(patch, () => {
+        if (screen === 'imp') this.tick('imp');
+        if (screen === 'exp') this.tick('mix');
+      });
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const cur = s.cur;
+
+    const lines = RAW.map((r, i) => {
+      const now = i === cur;
+      const done = i < cur;
+      return {
+        num: r[0], who: r[1], color: r[2], time: r[3], text: r[4],
+        state: now ? 'сейчас' : (done ? 'готово' : '—'),
+        stateColor: now ? C.bad : (done ? C.good : C.dim),
+        accent: now ? C.bad : 'transparent',
+        bg: now ? '#1b1f22' : 'transparent',
+        dot: now ? C.bad : (done ? C.good : '#2c3136'),
+        pick: () => this.playOrig({ cur: i })
+      };
+    });
+
+    const results = RAW.map((r, i) => ({
+      num: r[0], who: r[1], color: r[2], text: r[4],
+      start: (i % 3 === 2 ? '−' : '+') + (0.05 + (i % 5) * 0.09).toFixed(2) + ' с',
+      dur: (1.1 + (i % 4) * 0.62).toFixed(2) + ' с',
+      verdict: VERDICTS[i][0], vColor: VERDICTS[i][1], score: VERDICTS[i][2],
+      retake: () => this.setState({ cur: i, screen: 'rec', settings: false })
+    }));
+
+    const seeded = x => () => (x = (x * 1664525 + 1013904223) % 4294967296) / 4294967296;
+    function speechWave(N, segs, seed, colorFor) {
+      const r = seeded(seed);
+      const sylls = [];
+      segs.forEach(([a, b]) => {
+        const span = b - a; let t = a;
+        while (t < b - span * 0.04) {
+          const dur = span * (0.07 + r() * 0.11);
+          sylls.push([t, Math.min(b, t + dur), 0.42 + r() * 0.58]);
+          t += dur + span * (0.008 + r() * 0.045);
+        }
+      });
+      return Array.from({ length: N }, (_, i) => {
+        const pct = (i / (N - 1)) * 100;
+        let v = 0;
+        for (let k = 0; k < sylls.length; k++) {
+          const [a, b, amp] = sylls[k];
+          if (pct >= a && pct <= b) {
+            const p = (pct - a) / (b - a);
+            const env = Math.pow(Math.sin(Math.PI * Math.min(1, p * 1.18)), 0.55) * Math.exp(-p * 0.55);
+            v = Math.max(v, amp * env);
+          }
+        }
+        const voiced = v > 0.06;
+        const inSeg = segs.some(([a, b]) => pct >= a - 0.6 && pct <= b + 0.6);
+        const peak = Math.min(1, Math.max(inSeg ? 0.045 : 0.02, v * (0.78 + 0.22 * r())));
+        const rms = 0.4 + 0.34 * r();
+        const c = colorFor ? colorFor(pct, voiced) : { peak: '#343a3f', rms: '#5c646a' };
+        return { peak: (peak * 100).toFixed(1) + '%', rms: (rms * 100).toFixed(0) + '%', cPeak: c.peak, cRms: c.rms };
+      });
+    }
+    const BARS = 180;
+    if (!this._waves) {
+      const origWave = speechWave(BARS, [[9, 33.5], [37, 57], [62, 89]], 4231);
+      const mineWave = speechWave(BARS, [[11.4, 35.4], [39, 61], [65, 93.6]], 9187,
+        pct => pct > 89 ? { peak: 'oklch(0.62 0.19 25 / 0.4)', rms: C.bad } : { peak: 'oklch(0.80 0.13 210 / 0.34)', rms: C.gleb });
+      const liveWave = speechWave(BARS, [[11.4, 35.4], [39, 61]], 9187, () => ({ peak: 'oklch(0.62 0.19 25 / 0.4)', rms: 'oklch(0.70 0.21 25)' }))
+        .map((b, i) => (i / (BARS - 1)) * 100 > 49 ? { peak: '2%', rms: '100%', cPeak: '#1e2225', cRms: '#242a2e' } : b);
+      this._waves = { origWave, mineWave, liveWave };
+    }
+
+    const clips = RAW.map((r, i) => ({
+      left: (i * 8.1 + 1.5).toFixed(1) + '%',
+      width: (3.2 + (i % 4) * 1.4).toFixed(1) + '%',
+      color: r[2]
+    }));
+
+    const NAV = [
+      ['lib', '01 библиотека'], ['empty', '02 пусто'], ['imp', '03 импорт'], ['err', '04 ошибка'],
+      ['rec', '05 запись'], ['res', '08 итоги'], ['watch', '09 просмотр'], ['exp', '10 экспорт']
+    ];
+    const nav = NAV.map(([id, label]) => {
+      const on = s.screen === id;
+      return {
+        label, go: this.go(id),
+        bg: on ? '#1d2126' : 'transparent',
+        border: on ? '#4a5158' : '#23272b',
+        color: on ? '#e9ebed' : '#8b9298'
+      };
+    });
+    nav.push({
+      label: s.settings ? '07 настройки — закрыть' : '07 настройки',
+      go: () => this.setState(st => ({ settings: !st.settings })),
+      bg: s.settings ? '#1d2126' : 'transparent',
+      border: s.settings ? '#4a5158' : '#23272b',
+      color: s.settings ? '#e9ebed' : '#8b9298'
+    });
+
+    const done = cur;
+    const mixLine = Math.min(12, Math.round(s.mix / 100 * 12));
+
+    return {
+      showSwitcher: this.props.showSwitcher ?? true,
+      hint: this.props.showHints === false ? '' : (HINTS[s.screen] || ''),
+      isLib: s.screen === 'lib', isEmpty: s.screen === 'empty', isImport: s.screen === 'imp',
+      isError: s.screen === 'err', isRecord: s.screen === 'rec', isListen: false,
+      isResults: s.screen === 'res', isWatch: s.screen === 'watch', isExport: s.screen === 'exp',
+      settingsOpen: s.settings,
+
+      goLib: this.go('lib'), goEmpty: this.go('empty'), goImport: this.go('imp'), goError: this.go('err'),
+      goRecord: () => this.playOrig(), goListen: this.playTake, goResults: this.go('res'),
+      recPlay: s.rec === 'play',
+      takeScore: '92', takeStart: '+0,08 с — в точку', takeDur: '3,03 с при 2,85 — +6%', takeOut: '0,26 с после конца',
+      goWatch: this.go('watch'), goExport: this.go('exp'),
+      openSettings: () => this.setState({ settings: true }),
+      closeSettings: () => this.setState({ settings: false }),
+      nextLine: () => this.playOrig({ cur: Math.min(11, cur + 1) }),
+      prevLine: () => this.playOrig({ cur: Math.max(0, cur - 1) }),
+      nextTake: () => cur >= 11 ? this.go('res')() : this.playOrig({ cur: cur + 1 }),
+      skipOrig: this.skipOrig,
+      recOrig: s.rec === 'orig',
+      startRec: this.startRec, stopRec: this.stopRec, resetRec: this.resetRec,
+      recIdle: s.rec === 'idle', recLive: s.rec === 'live',
+      recDone: s.rec === 'done' || s.rec === 'play',
+      recNotDone: s.rec !== 'done' && s.rec !== 'play',
+      centerBig: s.rec === 'orig' ? '▶' : (s.rec === 'live' ? (s.prog < 30 ? String(3 - Math.floor(s.prog / 10)) : ((s.prog - 30) * 0.0285).toFixed(1)) : (s.rec === 'idle' ? 'R' : 'дубль 2')),
+      centerColor: '#e9ebed',
+      centerHint: s.rec === 'orig' ? 'слушайте оригинал' : (s.rec === 'live' ? (s.prog < 30 ? 'разбег' : 'говорите') : (s.rec === 'play' ? 'играет ваш дубль' : (s.rec === 'done' ? 'записан — прослушайте, перепишите или дальше' : 'нажмите R или «Записать дубль»'))),
+      recWave: (s.rec === 'idle' || s.rec === 'orig') ? [] : this._waves.mineWave.map((b, i) => {
+        const pct = (i / (BARS - 1)) * 100;
+        if (s.rec === 'live' && pct > 9 + (s.prog / 100) * 80) return { peak: '2%', rms: '100%', cPeak: '#1e2225', cRms: '#242a2e' };
+        return s.rec === 'live' ? { peak: b.peak, rms: b.rms, cPeak: b.cPeak, cRms: 'oklch(0.70 0.21 25)' } : b;
+      }),
+      recLegend: s.rec === 'orig' ? 'играет оригинал' : (s.rec === 'live' ? 'мой дубль — идёт запись' : (s.rec === 'play' ? 'мой дубль — играет' : (s.rec === 'done' ? 'мой дубль — записан' : 'мой дубль — ещё не записан'))),
+      recLegendColor: s.rec === 'live' ? 'oklch(0.62 0.19 25)' : (s.rec === 'done' || s.rec === 'play' ? C.gleb : (s.rec === 'orig' ? '#cfd4d8' : '#4a5158')),
+      playheadLeft: s.rec === 'idle' ? '9%' : (s.rec === 'done' ? '89%' : (9 + (s.prog / 100) * 80).toFixed(1) + '%'),
+      playheadColor: s.rec === 'live' ? 'oklch(0.70 0.21 25)' : '#e9ebed',
+      recTime: '00:0' + (s.rec === 'idle' ? '0.00' : (s.rec === 'done' ? '2.85' : Math.max(0, (s.prog - 30) * 0.0407).toFixed(2))) + ' / 00:02.85',
+      nextTakeLabel: cur >= 11 ? 'Свести и к итогам' : 'Следующая реплика',
+
+      screenNav: nav,
+      lines, results, clips,
+      origWave: this._waves.origWave, mineWave: this._waves.mineWave, liveWave: this._waves.liveWave,
+
+      curLabel: 'реплика ' + (cur + 1) + ' из 12',
+      sidebarLabel: done + ' из 12 озвучено',
+      curText: RAW[cur][4], curWho: RAW[cur][1], curColor: RAW[cur][2],
+      curWindow: RAW[cur][3] + ' — реплика ' + RAW[cur][1],
+      countdown: '2',
+      doneLabel: done + ' из 12 озвучено',
+      donePct: Math.round(done / 12 * 100) + '%',
+
+      importPct: s.imp + '%',
+      importEta: 'осталось ~' + Math.max(1, Math.round((100 - s.imp) * 0.4)) + ' с',
+      mixPct: s.mix + '%',
+      mixLabel: 'Свожу фонограмму и 12 дублей — ' + mixLine + ' из 12',
+      mixEta: s.mix >= 100 ? 'готово' : 'осталось ~' + Math.max(1, Math.round((100 - s.mix) * 0.6)) + ' с',
+      cancelLabel: s.mix >= 100 ? 'Закрыть' : 'Отменить сборку',
+      dlLabel: s.mix >= 100 ? 'Скачать mp4' : 'Скачать — ещё собирается',
+      dlBg: s.mix >= 100 ? 'oklch(0.80 0.13 85)' : '#2c3136',
+      dlColor: s.mix >= 100 ? '#14161a' : '#8b9298',
+
+      dspTrack: s.dsp ? C.warn : '#2c3136', dspKnob: s.dsp ? '#14161a' : '#8b9298', dspKnobLeft: s.dsp ? '23px' : '3px',
+      ticksTrack: s.ticks ? C.warn : '#2c3136', ticksKnob: s.ticks ? '#14161a' : '#8b9298', ticksKnobLeft: s.ticks ? '23px' : '3px',
+      autoTrack: s.auto ? C.warn : '#2c3136', autoKnob: s.auto ? '#14161a' : '#8b9298', autoKnobLeft: s.auto ? '23px' : '3px',
+      toggleDsp: () => this.setState(st => ({ dsp: !st.dsp })),
+      toggleTicks: () => this.setState(st => ({ ticks: !st.ticks })),
+      toggleAuto: () => this.setState(st => ({ auto: !st.auto }))
+    };
+  }
+}
+</script>
+</body>
+</html>
