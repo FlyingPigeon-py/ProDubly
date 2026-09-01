@@ -33,6 +33,7 @@ export default function Watch(props: {
   const playerRef = useRef<MixPlayer | null>(null);
   const rafRef = useRef(0);
   const scrubbingRef = useRef(false);
+  const correctingRef = useRef(0);
   const metaRef = useRef<PackMeta | null>(null);
   const takesRef = useRef<TakesMap>({});
   metaRef.current = meta;
@@ -139,20 +140,32 @@ export default function Watch(props: {
       const nearEnd = pos >= player.duration - 0.35 || v.ended || (v.duration > 0 && v.currentTime >= v.duration - 0.1);
       if (player.isPlaying() && !scrubbingRef.current && !nearEnd) {
         const drift = v.currentTime - pos;
+        // скорость меняем считанные разы за коррекцию (гистерезис):
+        // присваивание playbackRate каждый кадр заставляет WebKit пересинхронизировать
+        // видеоконвейер — от этого и была дрожь
         if (Math.abs(drift) > 0.5) {
-          // крайний случай — одна жёсткая перемотка
           v.currentTime = pos;
           v.playbackRate = 1;
-        } else if (Math.abs(drift) < 0.03) {
-          // мёртвая зона: не дёргаем скорость попусту
-          if (v.playbackRate !== 1) v.playbackRate = 1;
-        } else {
-          // немое видео: правка скорости незаметна, звук не трогаем вовсе
-          v.playbackRate = Math.min(1.1, Math.max(0.9, 1 - drift * 0.8));
+          correctingRef.current = 0;
+        } else if (correctingRef.current === 0) {
+          if (drift > 0.05) {
+            v.playbackRate = 0.96;
+            correctingRef.current = -1;
+          } else if (drift < -0.05) {
+            v.playbackRate = 1.04;
+            correctingRef.current = 1;
+          }
+        } else if (
+          (correctingRef.current === -1 && drift < 0.01) ||
+          (correctingRef.current === 1 && drift > -0.01)
+        ) {
+          v.playbackRate = 1;
+          correctingRef.current = 0;
         }
         if (v.paused) v.play().catch(() => {});
       } else if (nearEnd && v.playbackRate !== 1) {
         v.playbackRate = 1;
+        correctingRef.current = 0;
       }
 
       if (timeRef.current) {
