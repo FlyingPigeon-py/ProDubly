@@ -40,6 +40,17 @@ export interface TakeEngineDeps {
   hooks: TakeEngineHooks;
 }
 
+export interface LeadPlan {
+  from: number;
+  onScreen: number;
+  onPause: number;
+}
+
+export function leadPlan(lineStart: number, lead: number): LeadPlan {
+  const onScreen = Math.min(lead, Math.max(0, lineStart));
+  return { from: Math.max(0, lineStart - onScreen), onScreen, onPause: Math.max(0, lead - onScreen) };
+}
+
 export function lineWindow(line: PackLine | null, lead: number): LineWindow {
   if (!line) return { from: 0, to: 1, dur: 1, lineFrom: 0, lineTo: 1 };
   const dur = line.end - line.start;
@@ -245,10 +256,14 @@ export class TakeEngine {
       return;
     }
     this.setPhase("lead");
+    const plan = leadPlan(line.start, s.lead);
     const v = this.deps.video()!;
     v.muted = true;
-    v.currentTime = Math.max(0, line.start - s.lead);
-    v.play().catch(() => {});
+    v.currentTime = plan.from;
+    v.pause();
+    // реплике не хватает видео на разбег — досчитываем на замершем кадре
+    if (plan.onPause === 0) v.play().catch(() => {});
+    else this.timers.push(window.setTimeout(() => v.play().catch(() => {}), plan.onPause * 1000));
     this.trackPlayhead();
     const tick = s.lead / 3;
     for (let i = 0; i < 3; i++) {
@@ -283,7 +298,7 @@ export class TakeEngine {
     };
     const watcher = window.setInterval(() => {
       const vv = this.deps.video();
-      if (!vv) return;
+      if (!vv || vv.paused) return;
       if (vv.currentTime >= line.start - 0.005) {
         window.clearInterval(watcher);
         void begin();

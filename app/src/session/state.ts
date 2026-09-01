@@ -32,6 +32,7 @@ export type SessionCommand =
   | { type: "take"; lineId: string }
   | { type: "retake" }
   | { type: "advance" }
+  | { type: "goto"; lineIndex: number }
   | { type: "resume" }
   | { type: "finish" };
 
@@ -80,7 +81,7 @@ export function canStart(state: SessionState, meta: PackMeta): boolean {
 }
 
 export function canDrive(state: SessionState, meta: PackMeta, by: string): boolean {
-  return by === state.hostId || lineOwner(state, meta, state.lineIndex) === by;
+  return lineOwner(state, meta, state.lineIndex) === by;
 }
 
 export function reduce(
@@ -212,6 +213,15 @@ export function reduce(
       if (by !== state.hostId) return fail("Паузу снимает хост");
       if (state.phase !== "paused") return fail("Сессия не на паузе");
       return { state: { ...state, phase: "running", pausedFor: null } };
+    }
+
+    case "goto": {
+      if (state.phase !== "running") return fail("Сессия не идёт");
+      const line = meta.lines[cmd.lineIndex];
+      if (!line) return fail("Такой реплики нет");
+      const owns = state.roles[line.who] === by;
+      if (!owns && !canDrive(state, meta, by)) return fail("Эту реплику ведёт другой участник");
+      return { state: { ...state, lineIndex: cmd.lineIndex } };
     }
 
     case "finish": {

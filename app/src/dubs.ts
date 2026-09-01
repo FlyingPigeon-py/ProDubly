@@ -1,5 +1,6 @@
 import { api } from "./api";
 import { isTauri, mockMeta, mockTakes } from "./mock";
+import { normalizeTakes } from "./takes";
 import type { DubInfo, TakesMap } from "./types";
 
 export const SOLO_DUB = "solo";
@@ -67,7 +68,7 @@ export async function loadTakes(slug: string, dubId: string): Promise<TakesMap> 
   if (!isTauri) return dubId === SOLO_DUB ? mockTakes(mockMeta(slug)) : {};
   await api.migrateDubs(slug).catch(() => false);
   try {
-    return JSON.parse(await api.readText(slug, dubRel(dubId, "takes.json")));
+    return normalizeTakes(JSON.parse(await api.readText(slug, dubRel(dubId, "takes.json"))));
   } catch {
     return {};
   }

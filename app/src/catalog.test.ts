@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_FILTERS,
+  findPack,
   loadFilters,
   packDuration,
   packLineCount,
@@ -213,5 +214,17 @@ describe("память фильтров каталога", () => {
     store.set("dubl.catalog.filters", "{не json");
 
     expect(loadFilters()).toEqual(DEFAULT_FILTERS);
+  });
+});
+
+describe("поиск пака по названию папки", () => {
+  it("находит нужный пак среди прочих", () => {
+    const found = findPack([pack({ slug: "one" }), pack({ slug: "two", title: "Ночное такси" })], "two");
+
+    expect(found?.title).toBe("Ночное такси");
+  });
+
+  it("возвращает пусто, когда пака в каталоге нет", () => {
+    expect(findPack([pack({ slug: "one" })], "нет-такого")).toBe(null);
   });
 });

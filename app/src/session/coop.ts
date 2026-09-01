@@ -1,10 +1,11 @@
 import { api, assetUrl } from "../api";
-import { dubRel, ensureDub, saveDub, saveTakes } from "../dubs";
+import { dubRel, ensureDub, loadTakes, saveDub, saveTakes } from "../dubs";
 import { connectAsGuest, connectAsHost } from "../net/peer";
 import type { TakeHeader } from "../net/protocol";
 import { GuestRoom, HostRoom, type TakeStore } from "../net/room";
 import { Signaling } from "../net/signaling";
 import { iceServers, loadSettings } from "../settings";
+import { normalizeTake } from "../takes";
 import { initialState, type Participant, type SessionCommand, type SessionState } from "./state";
 import type { DubInfo, PackMeta, TakeInfo, TakesMap } from "../types";
 
@@ -83,7 +84,10 @@ export class CoopSession {
     this.slug = meta.slug;
     this.dubId = dubId;
     await ensureDub(meta.slug, dubId, "coop");
+    // возвращаемся в ту же комнату — дубли, записанные до обрыва, уже лежат на диске
+    this.takes = await loadTakes(meta.slug, dubId);
     this.guestRoom?.announce(meta);
+    this.catchUp();
     this.emit();
   }
 

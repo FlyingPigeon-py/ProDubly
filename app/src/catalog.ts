@@ -49,6 +49,10 @@ export function saveFilters(f: CatalogFilters): void {
   }
 }
 
+export function findPack(all: IndexPack[], slug: string): IndexPack | null {
+  return all.find((p) => p.slug === slug) ?? null;
+}
+
 export function packDuration(summaryValue: string): number | null {
   const m = /(\d+):(\d{2})/.exec(summaryValue);
   if (!m) return null;

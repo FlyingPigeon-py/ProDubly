@@ -1,32 +1,74 @@
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { api, loadPackMeta } from "../api";
+import { findPack } from "../catalog";
 import { newCoopDubId } from "../dubs";
+import { recallRoom, rememberRoom } from "../session/rooms";
 import type { CoopSession } from "../session/coop";
 import { canStart, unclaimedCharacters } from "../session/state";
-import type { PackMeta } from "../types";
+import type { IndexPack, PackMeta } from "../types";
 
 export default function Lobby(props: {
   session: CoopSession;
   packs: PackMeta[];
+  busy: boolean;
   onStarted: (slug: string, dubId: string) => void;
+  onInstallPack: (slug: string) => void;
   onOpenMarket: () => void;
   onLeave: () => void;
 }) {
   const view = useSyncExternalStore(props.session.subscribe, props.session.getSnapshot);
   const { state } = view;
   const isHost = view.role === "host";
-  const meta = props.packs.find((p) => p.slug === (view.slug || state.packSlug)) ?? null;
+  const [ownMeta, setOwnMeta] = useState<PackMeta | null>(null);
+  const wanted = view.slug || state.packSlug;
+  const meta = props.packs.find((p) => p.slug === wanted) ?? (ownMeta?.slug === wanted ? ownMeta : null);
   const pending = meta ? unclaimedCharacters(state, meta) : [];
   const ready = meta ? canStart(state, meta) : false;
   const live = state.participants.filter((p) => p.connected).length;
+  const [offered, setOffered] = useState<IndexPack | null>(null);
+  const [lookupFailed, setLookupFailed] = useState(false);
+
+  // пак может лежать на диске, даже если библиотека в памяти о нём ещё не знает
+  useEffect(() => {
+    if (!wanted || props.packs.some((p) => p.slug === wanted) || ownMeta?.slug === wanted) return;
+    let alive = true;
+    loadPackMeta(wanted)
+      .then((m) => alive && setOwnMeta(m))
+      .catch(() => alive && setOwnMeta(null));
+    return () => {
+      alive = false;
+    };
+  }, [wanted, props.packs, ownMeta]);
 
   useEffect(() => {
     if (view.hasPack || !meta) return;
-    void props.session.attachPack(meta, newCoopDubId());
-  }, [view.hasPack, meta, props.session]);
+    const remembered = recallRoom(view.code);
+    const dubId = remembered?.slug === meta.slug ? remembered.dubId : newCoopDubId();
+    rememberRoom(view.code, { slug: meta.slug, dubId });
+    void props.session.attachPack(meta, dubId);
+  }, [view.hasPack, view.code, meta, props.session]);
 
   useEffect(() => {
     if (state.phase === "running") props.onStarted(view.slug, view.dubId);
   }, [state.phase, view.slug, view.dubId, props]);
+
+  useEffect(() => {
+    if (meta || !state.packSlug) return;
+    let alive = true;
+    setLookupFailed(false);
+    api
+      .fetchIndex()
+      .then((text) => {
+        if (!alive) return;
+        const entry = findPack(JSON.parse(text) as IndexPack[], state.packSlug);
+        setOffered(entry);
+        setLookupFailed(entry === null);
+      })
+      .catch(() => alive && setLookupFailed(true));
+    return () => {
+      alive = false;
+    };
+  }, [meta, state.packSlug]);
 
   const owner = (character: string) => {
     const id = state.roles[character];
@@ -92,16 +134,57 @@ export default function Lobby(props: {
       <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "22px 28px 32px" }}>
         <div style={{ maxWidth: 640, margin: "0 auto", display: "flex", flexDirection: "column", gap: 14 }}>
           {!meta && (
-            <div className="card" style={{ padding: 22, borderRadius: 12, display: "flex", flexDirection: "column", gap: 14 }}>
-              <div style={{ fontSize: 14, color: "var(--text-mute)", lineHeight: 1.55 }}>
-                {state.packSlug
-                  ? `В комнате озвучивают пак «${state.packSlug}», а у вас его нет.`
-                  : "Ждём, пока хост скажет, какой пак озвучиваем."}
-              </div>
-              {state.packSlug && (
-                <button className="btn btn-primary" style={{ alignSelf: "flex-start" }} onClick={props.onOpenMarket}>
-                  Открыть витрину
-                </button>
+            <div className="card" style={{ padding: 22, borderRadius: 12, display: "flex", flexDirection: "column", gap: 16 }}>
+              {!state.packSlug && (
+                <div style={{ fontSize: 14, color: "var(--text-mute)" }}>Ждём, пока хост скажет, какой пак озвучиваем.</div>
+              )}
+
+              {state.packSlug && offered && (
+                <>
+                  <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+                    {offered.thumbnail && (
+                      <img
+                        src={offered.thumbnail}
+                        style={{ width: 148, height: 84, objectFit: "cover", borderRadius: 8, flex: "none", background: "#141719" }}
+                        onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
+                      />
+                    )}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 5, minWidth: 0 }}>
+                      <div style={{ fontSize: 17, fontWeight: 500 }}>{offered.title}</div>
+                      <div className="mono" style={{ fontSize: 12, color: "var(--text-dim)", display: "flex", gap: 8 }}>
+                        <span>{offered.creator}</span>
+                        <span style={{ color: "#3a4045" }}>·</span>
+                        <span>{offered.summaryValue}</span>
+                      </div>
+                      <div style={{ fontSize: 13.5, color: "var(--text-mute)", lineHeight: 1.5 }}>
+                        Этот пак озвучивают в комнате, а у вас его нет — скачайте, и можно разбирать роли.
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    className="btn btn-primary"
+                    style={{ alignSelf: "flex-start" }}
+                    disabled={props.busy}
+                    onClick={() => props.onInstallPack(state.packSlug)}
+                  >
+                    {props.busy ? "Качаем…" : `Скачать · ${offered.fileSize}`}
+                  </button>
+                </>
+              )}
+
+              {state.packSlug && !offered && (
+                <>
+                  <div style={{ fontSize: 14, color: "var(--text-mute)", lineHeight: 1.55 }}>
+                    {lookupFailed
+                      ? `Пак «${state.packSlug}» не нашёлся ни у вас, ни в витрине — возможно, хост собрал его сам.`
+                      : `Ищем пак «${state.packSlug}»…`}
+                  </div>
+                  {lookupFailed && (
+                    <button className="btn" style={{ alignSelf: "flex-start" }} onClick={props.onOpenMarket}>
+                      Открыть витрину
+                    </button>
+                  )}
+                </>
               )}
             </div>
           )}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, initApi, loadPackMeta } from "./api";
 import { buildPackMeta } from "./ini";
+import { findPack } from "./catalog";
 import { SOLO_DUB, ensureDub, newCoopDubId } from "./dubs";
 import { isTauri } from "./mock";
 import { ensurePlayer, loadSettings } from "./settings";
@@ -112,6 +113,23 @@ export default function App() {
     [refreshLibrary, coop]
   );
 
+  const installBySlug = useCallback(
+    async (slug: string) => {
+      try {
+        const index = JSON.parse(await api.fetchIndex()) as IndexPack[];
+        const entry = findPack(index, slug);
+        if (!entry) {
+          setError(`Пак «${slug}» не нашёлся в витрине — попросите хоста прислать его самому`);
+          return;
+        }
+        await installPack(entry);
+      } catch (e) {
+        setError(`Не удалось скачать пак: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    },
+    [installPack]
+  );
+
   const selfParticipant = useCallback(() => {
     const { id } = ensurePlayer();
     const name = loadSettings().playerName.trim() || "Игрок";
@@ -211,7 +229,9 @@ export default function App() {
           session={coop}
           packs={packs}
           onStarted={(slug, dubId) => setScreen({ name: "record", slug, dubId })}
+          onInstallPack={installBySlug}
           onOpenMarket={() => setScreen({ name: "market" })}
+          busy={importState !== null}
           onLeave={leaveCoop}
         />
       )}

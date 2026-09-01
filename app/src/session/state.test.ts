@@ -172,12 +172,13 @@ describe("проход по репликам", () => {
     expect(result.state.phase).toBe("finished");
   });
 
-  it("даёт хосту продавить переход за автора", () => {
+  it("не даёт хосту двигать проход за другого участника", () => {
     const state = apply(running(), [[{ type: "advance" }, HOST]]);
 
     const result = reduce(state, { type: "advance" }, HOST, makePack());
 
-    expect(result.state.phase).toBe("finished");
+    expect(result.error).toBe("Реплику двигает её автор");
+    expect(result.state.lineIndex).toBe(1);
   });
 
   it("заканчивает сессию после последней реплики", () => {
@@ -186,6 +187,50 @@ describe("проход по репликам", () => {
     const result = reduce(state, { type: "advance" }, GUEST, makePack());
 
     expect(result.state.phase).toBe("finished");
+  });
+});
+
+describe("возврат к своим репликам", () => {
+  it("переводит прогон на реплику того, кто её озвучивает", () => {
+    const state = apply(running(), [[{ type: "advance" }, HOST]]);
+
+    const result = reduce(state, { type: "goto", lineIndex: 0 }, HOST, makePack());
+
+    expect(result.state.lineIndex).toBe(0);
+  });
+
+  it("не пускает хоста на чужую реплику", () => {
+    const state = apply(running(), [[{ type: "advance" }, HOST]]);
+
+    const result = reduce(state, { type: "goto", lineIndex: 1 }, HOST, makePack());
+
+    expect(result.error).toBe("Эту реплику ведёт другой участник");
+  });
+
+  it("пускает владельца на его реплику, пока прогон стоит на чужой", () => {
+    const state = apply(running(), [[{ type: "advance" }, HOST]]);
+
+    const result = reduce(state, { type: "goto", lineIndex: 0 }, HOST, makePack());
+
+    expect(result.state.lineIndex).toBe(0);
+  });
+
+  it("не пускает на чужую реплику того, кто её не озвучивает", () => {
+    const state = apply(withBystander(), [
+      [{ type: "claim", character: "ГЛЕБ" }, HOST],
+      [{ type: "claim", character: "МИРА" }, GUEST],
+      [{ type: "start" }, HOST]
+    ]);
+
+    const result = reduce(state, { type: "goto", lineIndex: 1 }, BYSTANDER, makePack());
+
+    expect(result.error).toBe("Эту реплику ведёт другой участник");
+  });
+
+  it("не знает реплик за пределами пака", () => {
+    const result = reduce(running(), { type: "goto", lineIndex: 9 }, HOST, makePack());
+
+    expect(result.error).toBe("Такой реплики нет");
   });
 });
 
@@ -229,6 +274,19 @@ describe("обрывы связи", () => {
 
     expect(result.state.phase).toBe("running");
     expect(result.state.pausedFor).toBe(null);
+  });
+
+  it("возвращает хосту право вести проход вместе с ролью пропавшего", () => {
+    const state = apply(running(), [
+      [{ type: "advance" }, HOST],
+      [{ type: "leave", participantId: GUEST }, GUEST],
+      [{ type: "reassign", character: "МИРА", toParticipantId: HOST }, HOST],
+      [{ type: "resume" }, HOST]
+    ]);
+
+    const result = reduce(state, { type: "advance" }, HOST, makePack());
+
+    expect(result.state.phase).toBe("finished");
   });
 
   it("не даёт гостю снимать паузу", () => {

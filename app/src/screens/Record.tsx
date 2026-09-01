@@ -40,6 +40,7 @@ export default function Record(props: {
   const [meta, setMeta] = useState<PackMeta | null>(null);
   const [localTakes, setLocalTakes] = useState<TakesMap>({});
   const [localCur, setLocalCur] = useState(0);
+  const [viewIndex, setViewIndex] = useState<number | null>(null);
   const [phase, setPhase] = useState<TakePhase>("idle");
   const [leadCount, setLeadCount] = useState(3);
   const [origBins, setOrigBins] = useState<WaveBins | null>(null);
@@ -57,11 +58,13 @@ export default function Record(props: {
   const audioRef = useRef<HTMLAudioElement>(null);
   const engineRef = useRef<TakeEngine | null>(null);
   const bufferCache = useRef<Map<string, AudioBuffer>>(new Map());
-  const heardRef = useRef<string>("");
+  const binsStampRef = useRef<string>("");
   const autoNextTimer = useRef(0);
 
   const takes = coopView ? coopView.takes : localTakes;
-  const cur = coopView ? coopView.state.lineIndex : localCur;
+  const runIndex = coopView?.state.lineIndex ?? 0;
+  const inRun = !coopView || viewIndex === null;
+  const cur = coopView ? (viewIndex ?? runIndex) : localCur;
   const line: PackLine | null = meta?.lines[cur] ?? null;
   const hasTranslation = line ? Boolean(translation[line.id]) : false;
 
@@ -72,14 +75,16 @@ export default function Record(props: {
   const win = useMemo(() => lineWindow(line, settings.lead), [line, settings]);
 
   const owner = coopView && meta ? lineOwner(coopView.state, meta, cur) : undefined;
+  const runOwner = coopView && meta ? lineOwner(coopView.state, meta, runIndex) : undefined;
+  const runOwnerName = coopView?.state.participants.find((p) => p.id === runOwner)?.name ?? "";
   const ownerName = coopView?.state.participants.find((p) => p.id === owner)?.name ?? "";
   const mine = !coopView || owner === coopView.selfId;
   const isHost = coopView ? coopView.selfId === coopView.state.hostId : false;
-  const canDrive = !coopView || mine || isHost;
+  const canDrive = !coopView || (mine && inRun);
   const paused = coopView?.state.phase === "paused";
   const pausedName =
     coopView?.state.participants.find((p) => p.id === coopView.state.pausedFor)?.name ?? "участника";
-  const locked = Boolean(coopView) && (!mine || paused);
+  const locked = Boolean(coopView) && (!mine || paused || !inRun);
 
   const takeUrl = useCallback(
     (take: TakeInfo) => assetUrl(props.slug, dubRel(props.dubId, take.file)) + `?v=${take.recordedAt}`,
@@ -178,25 +183,6 @@ export default function Record(props: {
       }
       if (!alive || !buf) return;
       setOrigBins(binsFromSamples(buf.getChannelData(0), buf.sampleRate, line.start, win.from, win.dur, BARS));
-      const existing = takes[line.id];
-      if (existing) {
-        try {
-          const takeBuf = await decodeUrl(takeUrl(existing));
-          if (alive) {
-            recBinsRef.current = binsFromSamples(
-              takeBuf.getChannelData(0),
-              takeBuf.sampleRate,
-              line.start,
-              win.from,
-              win.dur,
-              BARS
-            );
-            setRecVersion((v) => v + 1);
-          }
-        } catch {
-          /* дубль ещё не читается — не страшно */
-        }
-      }
     })().catch(() => {});
     return () => {
       alive = false;
@@ -204,15 +190,48 @@ export default function Record(props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [line?.id, meta]);
 
+  useEffect(() => {
+    const take = line ? takes[line.id] : null;
+    if (!line || !take) return;
+    const stamp = `${line.id}:${take.recordedAt}`;
+    if (binsStampRef.current === stamp) return;
+    let alive = true;
+    (async () => {
+      const buf = await decodeUrl(takeUrl(take));
+      if (!alive || !buf) return;
+      binsStampRef.current = stamp;
+      recBinsRef.current = binsFromSamples(buf.getChannelData(0), buf.sampleRate, line.start, win.from, win.dur, BARS);
+      setRecVersion((v) => v + 1);
+    })().catch(() => {
+      // дубль ещё не дописан на диск — перерисуем, когда придёт следующая версия
+    });
+    return () => {
+      alive = false;
+    };
+  }, [line, takes, takeUrl, win]);
+
   const selectLine = useCallback(
     (idx: number) => {
-      if (!meta || coopView) return;
-      setLocalCur(idx);
-      engineRef.current?.setLine(meta.lines[idx]);
+      if (!meta) return;
+      const clamped = Math.min(Math.max(0, idx), meta.lines.length - 1);
+      if (coopView) setViewIndex(clamped === runIndex ? null : clamped);
+      else setLocalCur(clamped);
+      engineRef.current?.setLine(meta.lines[clamped]);
       engineRef.current?.showFrame();
     },
-    [meta, coopView]
+    [meta, coopView, runIndex]
   );
+
+  const backToRun = useCallback(() => {
+    setViewIndex(null);
+    engineRef.current?.showFrame();
+  }, []);
+
+  const takeOverLine = useCallback(() => {
+    if (!coop) return;
+    coop.command({ type: "goto", lineIndex: cur });
+    setViewIndex(null);
+  }, [coop, cur]);
 
   const playOrig = useCallback(() => {
     if (!line) return;
@@ -269,6 +288,7 @@ export default function Record(props: {
         setFatal(`Не удалось сохранить дубль: ${e instanceof Error ? e.message : String(e)}`);
         return;
       }
+      binsStampRef.current = `${line.id}:${take.recordedAt}`;
       if (autoNext && !coop && result.analysis.verdict !== "тишина") {
         autoNextTimer.current = window.setTimeout(() => {
           if (engineRef.current?.phase === "done") advanceRef.current();
@@ -279,17 +299,6 @@ export default function Record(props: {
   );
   const keepTakeRef = useRef(keepTake);
   keepTakeRef.current = keepTake;
-
-  useEffect(() => {
-    const engine = engineRef.current;
-    if (!engine || !line || !coopView) return;
-    const take = takes[line.id];
-    if (!take) return;
-    const stamp = `${line.id}:${take.recordedAt}`;
-    if (heardRef.current === stamp) return;
-    heardRef.current = stamp;
-    engine.playTake(takeUrl(take));
-  }, [takes, line, coopView, takeUrl]);
 
   useEffect(() => {
     if (coopView?.state.phase === "finished") props.onResults(props.slug, props.dubId);
@@ -325,10 +334,12 @@ export default function Record(props: {
         if (takes[line?.id ?? ""]) playTake();
         else playOrig();
       }
-      if (e.key === "ArrowRight" && canDrive && (engine.phase === "done" || engine.phase === "idle")) advance();
-      if (e.key === "ArrowLeft" && !coopView && (engine.phase === "done" || engine.phase === "idle") && cur > 0) {
-        selectLine(cur - 1);
+      if (engine.phase !== "done" && engine.phase !== "idle") return;
+      if (e.key === "ArrowRight") {
+        if (coopView) selectLine(cur + 1);
+        else if (canDrive) advance();
       }
+      if (e.key === "ArrowLeft" && cur > 0) selectLine(cur - 1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -360,7 +371,9 @@ export default function Record(props: {
     phase === "orig" ? "▶" : phase === "lead" ? String(leadCount) : phase === "rec" ? "●" : phase === "idle" && !locked ? "R" : "";
   const centerHint = paused
     ? `Пауза — ждём ${pausedName}`
-    : locked
+    : !inRun
+      ? `Смотрите реплику ${cur + 1} · прогон на ${runIndex + 1}`
+      : locked
       ? `Пишет ${ownerName || "другой участник"}`
       : phase === "orig"
         ? "Играет оригинал"
@@ -398,10 +411,17 @@ export default function Record(props: {
               onClick={() => selectLine(i)}
               style={{
                 flex: "1 1 6px",
-                cursor: coopView ? "default" : "pointer",
+                cursor: "pointer",
                 height: 6,
                 borderRadius: 99,
-                background: i === cur ? "var(--red)" : takes[l.id] ? "var(--green)" : "#2c3136",
+                background:
+                  i === cur
+                    ? "var(--red)"
+                    : coopView && i === runIndex
+                      ? "var(--amber)"
+                      : takes[l.id]
+                        ? "var(--green)"
+                        : "#2c3136",
                 transition: "background .2s"
               }}
             />
@@ -568,7 +588,15 @@ export default function Record(props: {
                 </RoundBtn>
               ) : (
                 <RoundBtn
-                  title={locked ? "Сейчас пишет другой участник" : "Записать дубль (R)"}
+                  title={
+                    !inRun
+                      ? "Вернитесь к прогону, чтобы записывать"
+                      : paused
+                        ? "Сессия на паузе"
+                        : locked
+                          ? "Эту реплику пишет другой участник"
+                          : "Записать дубль (R)"
+                  }
                   onClick={() => void startRec()}
                   bg="var(--red)"
                   disabled={locked || phase === "orig" || phase === "take"}
@@ -607,8 +635,26 @@ export default function Record(props: {
             <div style={{ flex: "none", padding: "14px 16px 0" }}>
               <div className="card" style={{ padding: 12, display: "flex", flexDirection: "column", gap: 7 }}>
                 <div className="mono" style={{ fontSize: 11, color: "var(--text-faint)" }}>
-                  {paused ? `пауза — ждём ${pausedName}` : mine ? "ваша реплика" : `реплику пишет ${ownerName}`}
+                  {paused
+                    ? `пауза — ждём ${pausedName}`
+                    : !inRun
+                      ? `прогон на реплике ${runIndex + 1} · пишет ${runOwnerName || "никто"}`
+                      : mine
+                        ? "ваша реплика"
+                        : `реплику пишет ${ownerName}`}
                 </div>
+                {!inRun && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {mine && (
+                      <button className="btn btn-primary" style={{ fontSize: 12, padding: "6px 10px" }} onClick={takeOverLine}>
+                        Переписать эту реплику
+                      </button>
+                    )}
+                    <button className="btn" style={{ fontSize: 12, padding: "6px 10px" }} onClick={backToRun}>
+                      Вернуться к прогону
+                    </button>
+                  </div>
+                )}
                 {paused && isHost && (
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     <button
@@ -713,7 +759,15 @@ export default function Record(props: {
                     background: active ? "#22272b" : "transparent"
                   }}
                 >
-                  <div className="mono" style={{ fontSize: 10.5, color: "var(--text-faint)", width: 18, flex: "none" }}>
+                  <div
+                    className="mono"
+                    style={{
+                      fontSize: 10.5,
+                      color: coopView && i === runIndex ? "var(--amber)" : "var(--text-faint)",
+                      width: 18,
+                      flex: "none"
+                    }}
+                  >
                     {String(i + 1).padStart(2, "0")}
                   </div>
                   <div style={{ width: 8, height: 8, borderRadius: 99, flex: "none", background: l.color }} />
