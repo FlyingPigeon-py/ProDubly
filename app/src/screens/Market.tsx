@@ -1,7 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api";
-import { DEFAULT_FILTERS, selectPacks, type CatalogFilters, type SortMode } from "../catalog";
+import { loadFilters, saveFilters, selectPacks, type CatalogFilters, type SortMode } from "../catalog";
 import type { IndexPack } from "../types";
+
+const PAGE = 60;
+
+const view = { scrollTop: 0, limit: PAGE };
 
 function Chip(props: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -29,16 +33,24 @@ export default function Market(props: {
   onOpen: (entry: IndexPack) => void;
 }) {
   const [all, setAll] = useState<IndexPack[] | null>(null);
-  const [filters, setFilters] = useState<CatalogFilters>(DEFAULT_FILTERS);
-  const [limit, setLimit] = useState(60);
+  const [filters, setFilters] = useState<CatalogFilters>(loadFilters);
+  const [limit, setLimit] = useState(view.limit);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [refreshed, setRefreshed] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
+  const restored = useRef(false);
 
-  const patch = (p: Partial<CatalogFilters>) => setFilters((f) => ({ ...f, ...p }));
-
-  useEffect(() => {
-    setLimit(60);
-  }, [filters]);
+  const patch = (p: Partial<CatalogFilters>) => {
+    setFilters((f) => {
+      const next = { ...f, ...p };
+      saveFilters(next);
+      return next;
+    });
+    view.scrollTop = 0;
+    view.limit = PAGE;
+    setLimit(PAGE);
+    if (listRef.current) listRef.current.scrollTop = 0;
+  };
 
   useEffect(() => {
     const dubPacks = (text: string) => (JSON.parse(text) as IndexPack[]).filter((p) => p.modType === "dub-pack");
@@ -62,6 +74,12 @@ export default function Market(props: {
 
   const filtered = useMemo(() => (all ? selectPacks(all, filters) : []), [all, filters]);
   const shown = filtered.slice(0, limit);
+
+  useLayoutEffect(() => {
+    if (restored.current || shown.length === 0 || !listRef.current) return;
+    restored.current = true;
+    listRef.current.scrollTop = view.scrollTop;
+  }, [shown.length]);
 
   return (
     <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", background: "var(--panel-bg)" }}>
@@ -172,7 +190,13 @@ export default function Market(props: {
         </div>
       </div>
 
-      <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "20px 28px 36px" }}>
+      <div
+        ref={listRef}
+        onScroll={(e) => {
+          view.scrollTop = e.currentTarget.scrollTop;
+        }}
+        style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "20px 28px 36px" }}
+      >
         {loadError && (
           <div className="card" style={{ padding: 20, color: "var(--text-mute)", fontSize: 14 }}>
             Каталог не загрузился: {loadError}
@@ -256,7 +280,15 @@ export default function Market(props: {
         </div>
         {filtered.length > limit && (
           <div style={{ display: "flex", justifyContent: "center", padding: "22px 0 6px" }}>
-            <button className="btn" onClick={() => setLimit((l) => l + 60)}>
+            <button
+              className="btn"
+              onClick={() =>
+                setLimit((l) => {
+                  view.limit = l + PAGE;
+                  return view.limit;
+                })
+              }
+            >
               Показать ещё · осталось {filtered.length - limit}
             </button>
           </div>

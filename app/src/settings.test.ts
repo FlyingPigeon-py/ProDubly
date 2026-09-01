@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DEFAULT_SETTINGS, loadSettings, saveSettings, updateSettings } from "./settings";
+import { DEFAULT_SETTINGS, DEFAULT_STUN, iceServers, loadSettings, saveSettings, updateSettings } from "./settings";
 
 const store = new Map<string, string>();
 
@@ -46,5 +46,25 @@ describe("loadSettings", () => {
     store.set("dubl.settings", "{не json");
 
     expect(loadSettings()).toEqual(DEFAULT_SETTINGS);
+  });
+});
+
+describe("серверы для связи", () => {
+  it("берёт STUN, которые отвечают из российских сетей", () => {
+    expect(iceServers(DEFAULT_SETTINGS)).toEqual([{ urls: DEFAULT_STUN }]);
+  });
+
+  it("не тянет за собой заблокированный STUN гугла", () => {
+    expect(DEFAULT_STUN.join(" ")).not.toContain("google");
+  });
+
+  it("добавляет TURN, когда его прописали в настройках", () => {
+    const servers = iceServers({ ...DEFAULT_SETTINGS, turnUrl: "turn:turn.example.com:3478", turnUser: "u", turnPass: "p" });
+
+    expect(servers[1]).toEqual({ urls: "turn:turn.example.com:3478", username: "u", credential: "p" });
+  });
+
+  it("обходится без TURN, пока поле пустое", () => {
+    expect(iceServers({ ...DEFAULT_SETTINGS, turnUrl: "   " })).toHaveLength(1);
   });
 });

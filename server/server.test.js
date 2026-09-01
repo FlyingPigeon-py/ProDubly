@@ -5,7 +5,7 @@ import { startServer } from "./index.js";
 let server;
 
 beforeEach(async () => {
-  server = await startServer(0);
+  server = await startServer(0, { log: () => {} });
 });
 
 afterEach(async () => {

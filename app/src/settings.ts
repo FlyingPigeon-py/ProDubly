@@ -64,10 +64,14 @@ export function ensurePlayer(): { id: string; name: string } {
   return { id, name };
 }
 
+export const DEFAULT_STUN = [
+  "stun:stun.cloudflare.com:3478",
+  "stun:global.stun.twilio.com:3478",
+  "stun:stun.sipnet.ru:3478"
+];
+
 export function iceServers(s: AppSettings): RTCIceServer[] {
-  const servers: RTCIceServer[] = [
-    { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] }
-  ];
+  const servers: RTCIceServer[] = [{ urls: DEFAULT_STUN }];
   if (s.turnUrl.trim()) {
     servers.push({ urls: s.turnUrl.trim(), username: s.turnUser, credential: s.turnPass });
   }

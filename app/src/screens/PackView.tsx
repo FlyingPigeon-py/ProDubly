@@ -39,14 +39,6 @@ export default function PackView(props: {
             18+
           </div>
         )}
-        <div style={{ flex: 1 }} />
-        <button
-          className={props.installed ? "btn" : "btn btn-primary"}
-          disabled={props.busy || props.installed}
-          onClick={() => props.onInstall(p)}
-        >
-          {props.installed ? "Уже в библиотеке" : `Скачать · ${p.fileSize}`}
-        </button>
       </div>
 
       <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: 28 }}>
@@ -124,7 +116,7 @@ export default function PackView(props: {
               disabled={props.busy || props.installed}
               onClick={() => props.onInstall(p)}
             >
-              {props.installed ? "Уже в библиотеке" : "Скачать и озвучить"}
+              {props.installed ? "Уже в библиотеке" : `Скачать и озвучить · ${p.fileSize}`}
             </button>
           </div>
         </div>

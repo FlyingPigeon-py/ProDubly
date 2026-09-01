@@ -22,6 +22,33 @@ export const DEFAULT_FILTERS: CatalogFilters = {
   sort: "new"
 };
 
+const FILTERS_KEY = "dubl.catalog.filters";
+
+export function loadFilters(): CatalogFilters {
+  try {
+    const raw = localStorage.getItem(FILTERS_KEY);
+    if (!raw) return { ...DEFAULT_FILTERS };
+    const saved = JSON.parse(raw) as Partial<CatalogFilters>;
+    return {
+      ...DEFAULT_FILTERS,
+      ...saved,
+      sort: (["new", "az", "small"] as SortMode[]).includes(saved.sort as SortMode)
+        ? (saved.sort as SortMode)
+        : DEFAULT_FILTERS.sort
+    };
+  } catch {
+    return { ...DEFAULT_FILTERS };
+  }
+}
+
+export function saveFilters(f: CatalogFilters): void {
+  try {
+    localStorage.setItem(FILTERS_KEY, JSON.stringify(f));
+  } catch {
+    // приватный режим без хранилища — фильтры просто не переживут перезапуск
+  }
+}
+
 export function packDuration(summaryValue: string): number | null {
   const m = /(\d+):(\d{2})/.exec(summaryValue);
   if (!m) return null;

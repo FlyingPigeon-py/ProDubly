@@ -1,5 +1,13 @@
-import { describe, expect, it } from "vitest";
-import { DEFAULT_FILTERS, packDuration, packLineCount, packSizeMb, selectPacks } from "./catalog";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  DEFAULT_FILTERS,
+  loadFilters,
+  packDuration,
+  packLineCount,
+  packSizeMb,
+  saveFilters,
+  selectPacks
+} from "./catalog";
 import type { IndexPack } from "./types";
 
 function pack(over: Partial<IndexPack> = {}): IndexPack {
@@ -163,5 +171,47 @@ describe("selectPacks", () => {
     const found = selectPacks(all, { ...DEFAULT_FILTERS, q: "такси", trendingOnly: true, maxDuration: 30 });
 
     expect(found.map((p) => p.slug)).toEqual(["a"]);
+  });
+});
+
+describe("память фильтров каталога", () => {
+  const store = new Map<string, string>();
+
+  beforeEach(() => {
+    store.clear();
+    vi.stubGlobal("localStorage", {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => void store.set(k, v),
+      removeItem: (k: string) => void store.delete(k),
+      clear: () => store.clear()
+    });
+  });
+
+  it("возвращает дефолты, пока ничего не сохраняли", () => {
+    expect(loadFilters()).toEqual(DEFAULT_FILTERS);
+  });
+
+  it("помнит выбранные фильтры между запусками", () => {
+    saveFilters({ ...DEFAULT_FILTERS, q: "лифт", showMature: true, maxLines: 5, sort: "az" });
+
+    expect(loadFilters()).toMatchObject({ q: "лифт", showMature: true, maxLines: 5, sort: "az" });
+  });
+
+  it("добирает недостающие поля из дефолтов", () => {
+    store.set("dubl.catalog.filters", JSON.stringify({ q: "такси" }));
+
+    expect(loadFilters()).toEqual({ ...DEFAULT_FILTERS, q: "такси" });
+  });
+
+  it("не верит незнакомой сортировке", () => {
+    store.set("dubl.catalog.filters", JSON.stringify({ sort: "по-настроению" }));
+
+    expect(loadFilters().sort).toBe("new");
+  });
+
+  it("переживает битую запись в хранилище", () => {
+    store.set("dubl.catalog.filters", "{не json");
+
+    expect(loadFilters()).toEqual(DEFAULT_FILTERS);
   });
 });
