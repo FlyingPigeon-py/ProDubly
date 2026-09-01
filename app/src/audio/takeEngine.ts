@@ -61,6 +61,7 @@ export class TakeEngine {
   private raf = 0;
   private clock = { samples: 0, rate: 48000 };
   private recActive = false;
+  private correcting = 0;
   private line: PackLine | null = null;
   private win: LineWindow = lineWindow(null, 0);
   private currentPhase: TakePhase = "idle";
@@ -139,13 +140,22 @@ export class TakeEngine {
         if (this.recActive) {
           t = line.start + this.clock.samples / this.clock.rate;
           const drift = v.currentTime - t;
+          // гистерезис вместо перекрута скорости каждый кадр — иначе видео дрожит
           if (Math.abs(drift) > 0.25) {
             v.currentTime = t;
             v.playbackRate = 1;
-          } else if (Math.abs(drift) > 0.03) {
-            v.playbackRate = Math.min(1.1, Math.max(0.9, 1 - drift * 0.8));
-          } else if (v.playbackRate !== 1) {
+            this.correcting = 0;
+          } else if (this.correcting === 0) {
+            if (drift > 0.05) {
+              v.playbackRate = 0.96;
+              this.correcting = -1;
+            } else if (drift < -0.05) {
+              v.playbackRate = 1.04;
+              this.correcting = 1;
+            }
+          } else if ((this.correcting === -1 && drift < 0.01) || (this.correcting === 1 && drift > -0.01)) {
             v.playbackRate = 1;
+            this.correcting = 0;
           }
         } else {
           if (v.playbackRate !== 1) v.playbackRate = 1;
@@ -265,6 +275,7 @@ export class TakeEngine {
       if (began) return;
       began = true;
       this.clock = { samples: 0, rate: rec.sampleRate };
+      this.correcting = 0;
       await rec.start();
       this.recActive = true;
       this.setPhase("rec");
