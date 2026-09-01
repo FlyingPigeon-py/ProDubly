@@ -3,14 +3,23 @@ export interface IndexPack {
   slug: string;
   title: string;
   shortDescription: string;
+  searchText: string;
   modType: string;
   creator: string;
+  sourceName: string;
+  installFolder: string;
+  hostingStatus: string;
   thumbnail: string;
   tags: string[];
   language: string;
   fileSize: string;
   mature: boolean;
+  verified: boolean;
+  featured: boolean;
+  trending: boolean;
+  summaryLabel: string;
   summaryValue: string;
+  createdAt: string;
   updatedAt: string;
 }
 
@@ -63,6 +72,7 @@ export interface PackMeta {
 
 export interface TakeInfo {
   file: string;
+  authorId?: string;
   duration: number;
   recordedAt: number;
   takeCount?: number;
@@ -77,6 +87,22 @@ export interface TakeInfo {
 }
 
 export type TakesMap = Record<string, TakeInfo>;
+
+export interface DubParticipant {
+  id: string;
+  name: string;
+}
+
+export interface DubInfo {
+  id: string;
+  kind: "solo" | "coop";
+  createdAt: number;
+  updatedAt: number;
+  participants: DubParticipant[];
+  roles: Record<string, string>;
+}
+
+export type TranslationMap = Record<string, string>;
 
 export interface DownloadProgress {
   slug: string;

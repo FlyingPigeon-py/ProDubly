@@ -19,14 +19,23 @@ export function mockIndex(): IndexPack[] {
     slug: `mock-${i}`,
     title,
     shortDescription: `${title} — пак сообщества.`,
+    searchText: `${title} ${creator} пак сообщества`.toLowerCase(),
     modType: "dub-pack",
     creator,
+    sourceName: i % 3 === 0 ? "Creator Submission" : "GameBanana",
+    installFolder: `mock-${i}`,
+    hostingStatus: "self-hosted-authorized",
     thumbnail: `https://picsum.photos/seed/${encodeURIComponent(title)}/640/360`,
     tags: [],
     language: "Russian",
     fileSize: size,
     mature: i === 5,
+    verified: false,
+    featured: false,
+    trending: i % 2 === 0,
+    summaryLabel: "Video",
     summaryValue: summary,
+    createdAt: `2026-07-${String(14 - i).padStart(2, "0")}`,
     updatedAt: `2026-08-${String(14 - i).padStart(2, "0")}`
   }));
 }

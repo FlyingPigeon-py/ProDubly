@@ -1,6 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
+import { DEFAULT_FILTERS, selectPacks, type CatalogFilters, type SortMode } from "../catalog";
 import type { IndexPack } from "../types";
+
+function Chip(props: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <div
+      onClick={props.onClick}
+      style={{
+        border: `1px solid ${props.active ? "var(--border)" : "var(--line)"}`,
+        borderRadius: 99,
+        padding: "6px 12px",
+        color: props.active ? "var(--text-soft)" : "var(--text-faint)",
+        cursor: "pointer",
+        transition: "color .15s, border-color .15s"
+      }}
+    >
+      {props.children}
+    </div>
+  );
+}
 
 export default function Market(props: {
   installedSlugs: string[];
@@ -10,54 +29,38 @@ export default function Market(props: {
   onOpen: (entry: IndexPack) => void;
 }) {
   const [all, setAll] = useState<IndexPack[] | null>(null);
-  const [q, setQ] = useState("");
-  const [showMature, setShowMature] = useState(false);
-  const [sort, setSort] = useState<"new" | "az" | "small">("new");
+  const [filters, setFilters] = useState<CatalogFilters>(DEFAULT_FILTERS);
   const [limit, setLimit] = useState(60);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [refreshed, setRefreshed] = useState(false);
+
+  const patch = (p: Partial<CatalogFilters>) => setFilters((f) => ({ ...f, ...p }));
 
   useEffect(() => {
     setLimit(60);
-  }, [q, sort, showMature]);
+  }, [filters]);
 
   useEffect(() => {
-    api
-      .fetchIndex()
+    const dubPacks = (text: string) => (JSON.parse(text) as IndexPack[]).filter((p) => p.modType === "dub-pack");
+    let gotFresh = false;
+    const unlisten = api.onIndexUpdated((text) => {
+      gotFresh = true;
+      setAll(dubPacks(text));
+      setLoadError(null);
+      setRefreshed(true);
+    });
+    unlisten
+      .then(() => api.fetchIndex())
       .then((text) => {
-        const parsed = JSON.parse(text) as IndexPack[];
-        setAll(parsed.filter((p) => p.modType === "dub-pack"));
+        if (!gotFresh) setAll(dubPacks(text));
       })
       .catch((e) => setLoadError(String(e)));
+    return () => {
+      unlisten.then((off) => off());
+    };
   }, []);
 
-  const filtered = useMemo(() => {
-    if (!all) return [];
-    const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    const bySize = (p: IndexPack) => {
-      const n = parseFloat(p.fileSize) || 9999;
-      return p.fileSize.includes("KB") ? n / 1024 : p.fileSize.includes("GB") ? n * 1024 : n;
-    };
-    // полнотекст как на самом сайте: название, автор, описание, теги, язык
-    const haystack = (p: IndexPack & { searchText?: string }) =>
-      (
-        p.searchText ??
-        `${p.title} ${p.creator} ${p.shortDescription} ${p.tags.join(" ")} ${p.language}`
-      ).toLowerCase();
-    return all
-      .filter((p) => (showMature || !p.mature))
-      .filter((p) => {
-        if (words.length === 0) return true;
-        const h = haystack(p);
-        return words.every((w) => h.includes(w));
-      })
-      .sort((a, b) =>
-        sort === "az"
-          ? a.title.localeCompare(b.title)
-          : sort === "small"
-            ? bySize(a) - bySize(b)
-            : (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "")
-      );
-  }, [all, q, showMature, sort]);
+  const filtered = useMemo(() => (all ? selectPacks(all, filters) : []), [all, filters]);
   const shown = filtered.slice(0, limit);
 
   return (
@@ -82,21 +85,19 @@ export default function Market(props: {
           choicervoicer.com
         </div>
         <div style={{ flex: 1 }} />
-        <label
-          className="mono"
-          style={{ fontSize: 11, color: "var(--text-faint)", display: "flex", gap: 8, alignItems: "center", cursor: "pointer" }}
-        >
-          <input type="checkbox" checked={showMature} onChange={(e) => setShowMature(e.target.checked)} />
-          показывать 18+
-        </label>
+        {refreshed && (
+          <div className="mono" style={{ fontSize: 11, color: "var(--text-faint)" }}>
+            Каталог обновлён
+          </div>
+        )}
       </div>
 
       <div style={{ padding: "20px 28px 0", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
         <input
           className="search"
           placeholder="Поиск по всему каталогу: название, автор, описание, теги…"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
+          value={filters.q}
+          onChange={(e) => patch({ q: e.target.value })}
           style={{ maxWidth: 420 }}
         />
         <div className="mono" style={{ display: "flex", gap: 8, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase" }}>
@@ -104,27 +105,70 @@ export default function Market(props: {
             [
               ["new", "новые"],
               ["az", "а-я"],
-              ["small", "полегче"]
-            ] as ["new" | "az" | "small", string][]
+              ["small", "по размеру"]
+            ] as [SortMode, string][]
           ).map(([s, label]) => (
-            <div
-              key={s}
-              onClick={() => setSort(s)}
-              style={{
-                border: `1px solid ${sort === s ? "var(--border)" : "var(--line)"}`,
-                borderRadius: 99,
-                padding: "6px 12px",
-                color: sort === s ? "var(--text-soft)" : "var(--text-faint)",
-                cursor: "pointer",
-                transition: "color .15s, border-color .15s"
-              }}
-            >
+            <Chip key={s} active={filters.sort === s} onClick={() => patch({ sort: s })}>
               {label}
-            </div>
+            </Chip>
           ))}
         </div>
         <div className="mono" style={{ fontSize: 12, color: "var(--text-faint)", marginLeft: "auto" }}>
-          {all ? `${filtered.length} ${filtered.length === 1 ? "пак" : "паков"}` : "загружаю каталог…"}
+          {all ? `${filtered.length} ${filtered.length === 1 ? "пак" : "паков"}` : "Загрузка каталога…"}
+        </div>
+      </div>
+
+      <div
+        className="mono"
+        style={{
+          padding: "12px 28px 0",
+          display: "flex",
+          gap: 18,
+          alignItems: "center",
+          flexWrap: "wrap",
+          fontSize: 11,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase"
+        }}
+      >
+        <div style={{ display: "flex", gap: 8 }}>
+          <Chip active={filters.trendingOnly} onClick={() => patch({ trendingOnly: !filters.trendingOnly })}>
+            в тренде
+          </Chip>
+          <Chip active={filters.creatorsOnly} onClick={() => patch({ creatorsOnly: !filters.creatorsOnly })}>
+            от авторов
+          </Chip>
+          <Chip active={filters.showMature} onClick={() => patch({ showMature: !filters.showMature })}>
+            18+
+          </Chip>
+        </div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <span style={{ color: "var(--text-faint)" }}>ролик</span>
+          {(
+            [
+              [null, "любой"],
+              [30, "до 30с"],
+              [60, "до 1 мин"]
+            ] as [number | null, string][]
+          ).map(([v, label]) => (
+            <Chip key={label} active={filters.maxDuration === v} onClick={() => patch({ maxDuration: v })}>
+              {label}
+            </Chip>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <span style={{ color: "var(--text-faint)" }}>реплик</span>
+          {(
+            [
+              [null, "любое"],
+              [5, "до 5"],
+              [15, "до 15"]
+            ] as [number | null, string][]
+          ).map(([v, label]) => (
+            <Chip key={label} active={filters.maxLines === v} onClick={() => patch({ maxLines: v })}>
+              {label}
+            </Chip>
+          ))}
         </div>
       </div>
 

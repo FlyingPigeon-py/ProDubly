@@ -1,0 +1,16 @@
+{
+  "name": "dubl-rooms",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.11"
+  }
+}

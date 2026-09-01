@@ -1,36 +1,50 @@
 import { useEffect, useMemo, useState } from "react";
-import { assetUrl, loadTakes } from "../api";
+import { assetUrl } from "../api";
+import { SOLO_DUB, deleteDub, dubTitle, listDubs, loadTakes } from "../dubs";
 import { SettingsIcon } from "./Record";
-import type { PackMeta } from "../types";
+import type { DubInfo, PackMeta } from "../types";
 
 type Filter = "all" | "wip" | "ready";
 
 export default function Library(props: {
   packs: PackMeta[];
   onOpenMarket: () => void;
-  onRecord: (slug: string) => void;
-  onWatch: (slug: string) => void;
+  onRecord: (slug: string, dubId: string) => void;
+  onWatch: (slug: string, dubId: string) => void;
   onDelete: (slug: string) => void;
+  onHostCoop: (slug: string) => void;
+  onJoinCoop: (code: string) => void;
   onSettings: () => void;
 }) {
   const [progress, setProgress] = useState<Record<string, number>>({});
+  const [dubs, setDubs] = useState<Record<string, DubInfo[]>>({});
   const [filter, setFilter] = useState<Filter>("all");
   const [pendingDelete, setPendingDelete] = useState<PackMeta | null>(null);
+  const [joining, setJoining] = useState(false);
+  const [code, setCode] = useState("");
+  const [reload, setReload] = useState(0);
 
   useEffect(() => {
     (async () => {
-      const entries: Record<string, number> = {};
+      const counts: Record<string, number> = {};
+      const found: Record<string, DubInfo[]> = {};
       for (const p of props.packs) {
-        const takes = await loadTakes(p.slug);
-        entries[p.slug] = Object.keys(takes).filter((id) => p.lines.some((l) => l.id === id)).length;
+        const list = await listDubs(p.slug);
+        found[p.slug] = list;
+        const ids = list.some((d) => d.id === SOLO_DUB) ? list.map((d) => d.id) : [SOLO_DUB, ...list.map((d) => d.id)];
+        for (const id of ids) {
+          const takes = await loadTakes(p.slug, id);
+          counts[`${p.slug}/${id}`] = Object.keys(takes).filter((id) => p.lines.some((l) => l.id === id)).length;
+        }
       }
-      setProgress(entries);
+      setProgress(counts);
+      setDubs(found);
     })();
-  }, [props.packs]);
+  }, [props.packs, reload]);
 
   const shown = useMemo(() => {
     return props.packs.filter((p) => {
-      const done = progress[p.slug] ?? 0;
+      const done = progress[`${p.slug}/${SOLO_DUB}`] ?? 0;
       if (filter === "wip") return done > 0 && done < p.lines.length;
       if (filter === "ready") return p.lines.length > 0 && done >= p.lines.length;
       return true;
@@ -55,6 +69,7 @@ export default function Library(props: {
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <SettingsIcon onClick={props.onSettings} />
+          <button className="btn" onClick={() => setJoining(true)}>Войти по коду</button>
           <button className="btn btn-primary" onClick={props.onOpenMarket}>Добавить пак</button>
         </div>
       </div>
@@ -128,9 +143,10 @@ export default function Library(props: {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 300px))", gap: 18, alignItems: "stretch" }}>
           {shown.map((p) => {
-            const done = progress[p.slug] ?? 0;
+            const done = progress[`${p.slug}/${SOLO_DUB}`] ?? 0;
             const total = p.lines.length;
             const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+            const coopDubs = (dubs[p.slug] ?? []).filter((d) => d.kind === "coop");
             const coverRel = p.cover ?? p.icon;
             return (
               <div key={p.slug} className="card card-hover" style={{ overflow: "hidden", display: "flex", flexDirection: "column", position: "relative" }}>
@@ -191,8 +207,62 @@ export default function Library(props: {
                       <div className="mono" style={{ fontSize: 11, color: "var(--text-faint)" }}>+{p.characters.length - 6}</div>
                     )}
                   </div>
+                  {coopDubs.length > 0 && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                      {coopDubs.map((d) => {
+                        const dubDone = progress[`${p.slug}/${d.id}`] ?? 0;
+                        return (
+                          <div
+                            key={d.id}
+                            className="row-hover"
+                            style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 7px", borderRadius: 7 }}
+                          >
+                            <div
+                              onClick={() => (dubDone >= total ? props.onWatch(p.slug, d.id) : props.onRecord(p.slug, d.id))}
+                              style={{ flex: 1, minWidth: 0, cursor: "pointer", display: "flex", flexDirection: "column", gap: 2 }}
+                            >
+                              <div className="mono" style={{ fontSize: 11, color: "var(--text-mute)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                {dubTitle(d)}
+                              </div>
+                              <div className="mono" style={{ fontSize: 10.5, color: "var(--text-faint)" }}>
+                                вместе · {dubDone}/{total}
+                              </div>
+                            </div>
+                            <div
+                              title="удалить этот дубль"
+                              onClick={async () => {
+                                await deleteDub(p.slug, d.id);
+                                setReload((v) => v + 1);
+                              }}
+                              className="mono"
+                              style={{ flex: "none", fontSize: 15, color: "var(--text-faint)", cursor: "pointer", padding: "0 4px" }}
+                            >
+                              ×
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                   <div
-                    onClick={() => (pct >= 100 ? props.onWatch(p.slug) : props.onRecord(p.slug))}
+                    onClick={() => props.onHostCoop(p.slug)}
+                    className="mono"
+                    style={{
+                      border: "1px solid var(--card-border)",
+                      borderRadius: 9,
+                      height: 34,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 12,
+                      color: "var(--text-mute)",
+                      cursor: "pointer"
+                    }}
+                  >
+                    Позвать друзей
+                  </div>
+                  <div
+                    onClick={() => (pct >= 100 ? props.onWatch(p.slug, SOLO_DUB) : props.onRecord(p.slug, SOLO_DUB))}
                     style={{
                       marginTop: "auto",
                       position: "relative",
@@ -220,6 +290,51 @@ export default function Library(props: {
           })}
         </div>
       </div>
+
+      {joining && (
+        <div className="overlay" onClick={() => setJoining(false)}>
+          <div className="modal" style={{ width: 460 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ fontSize: 20, fontWeight: 500 }}>Войти в комнату</div>
+              <div style={{ fontSize: 14, color: "var(--text-mute)", lineHeight: 1.55 }}>
+                Введите код, который назвал хост. Пак, который вы будете озвучивать, должен быть уже скачан — иначе
+                комната не пустит вас в старт.
+              </div>
+            </div>
+            <input
+              className="mono"
+              autoFocus
+              value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              placeholder="KX7M2A"
+              style={{
+                background: "#141719",
+                border: "1px solid var(--border)",
+                borderRadius: 9,
+                padding: "12px 14px",
+                fontSize: 20,
+                letterSpacing: "0.28em",
+                color: "var(--text)",
+                textAlign: "center"
+              }}
+            />
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+              <button className="btn" onClick={() => setJoining(false)}>Отмена</button>
+              <button
+                className="btn btn-primary"
+                disabled={code.trim().length < 4}
+                onClick={() => {
+                  setJoining(false);
+                  props.onJoinCoop(code.trim());
+                  setCode("");
+                }}
+              >
+                Войти
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {pendingDelete && (
         <div className="overlay" onClick={() => setPendingDelete(null)}>

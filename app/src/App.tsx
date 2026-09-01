@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, initApi, loadPackMeta } from "./api";
 import { buildPackMeta } from "./ini";
+import { SOLO_DUB, ensureDub, newCoopDubId } from "./dubs";
 import { isTauri } from "./mock";
+import { ensurePlayer, loadSettings } from "./settings";
+import { CoopSession } from "./session/coop";
 import type { IndexPack, PackMeta } from "./types";
 import Library from "./screens/Library";
+import Lobby from "./screens/Lobby";
 import Market from "./screens/Market";
 import PackView from "./screens/PackView";
 import Record from "./screens/Record";
@@ -16,9 +20,10 @@ type Screen =
   | { name: "lib" }
   | { name: "market" }
   | { name: "pack"; entry: IndexPack }
-  | { name: "record"; slug: string; line?: number }
-  | { name: "results"; slug: string }
-  | { name: "watch"; slug: string };
+  | { name: "lobby" }
+  | { name: "record"; slug: string; dubId: string; line?: number }
+  | { name: "results"; slug: string; dubId: string }
+  | { name: "watch"; slug: string; dubId: string };
 
 export default function App() {
   const [ready, setReady] = useState(false);
@@ -28,6 +33,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsVersion, setSettingsVersion] = useState(0);
+  const [coop, setCoop] = useState<CoopSession | null>(null);
 
   const refreshLibrary = useCallback(async () => {
     const slugs = await api.listImported();
@@ -59,7 +65,7 @@ export default function App() {
         thumbnail: entry.thumbnail,
         phase: "download",
         pct: 0,
-        step: "скачиваю"
+        step: "Скачивание"
       });
       const unDl = await api.onDownloadProgress((p) => {
         if (p.slug !== entry.slug) return;
@@ -68,7 +74,7 @@ export default function App() {
             ...s,
             phase: "download",
             pct: p.total > 0 ? Math.round((p.received / p.total) * 100) : 0,
-            step: `скачиваю · ${(p.received / 1048576).toFixed(1)} МБ`
+            step: `Скачано ${(p.received / 1048576).toFixed(1)} МБ`
           }
         );
       });
@@ -85,26 +91,68 @@ export default function App() {
       });
       try {
         await api.downloadPack(entry.slug);
-        setImportState((s) => s && { ...s, phase: "convert", pct: 0, step: "разбираю пак" });
+        setImportState((s) => s && { ...s, phase: "convert", pct: 0, step: "Подготовка" });
         const report = await api.importPack(entry.slug);
-        const meta = buildPackMeta(entry.slug, report, entry.title);
+        const meta = buildPackMeta(entry.slug, report, entry.title, entry.creator);
         if (meta.lines.length === 0) {
-          throw new Error("в паке не нашлось ни одной реплики с таймингом");
+          throw new Error("В паке не нашлось ни одной реплики, которую можно озвучить");
         }
         await api.writeText(entry.slug, "pack.json", JSON.stringify(meta, null, 2));
         await refreshLibrary();
         setImportState(null);
-        setScreen({ name: "record", slug: entry.slug });
+        setScreen(coop ? { name: "lobby" } : { name: "record", slug: entry.slug, dubId: SOLO_DUB });
       } catch (e) {
         setImportState(null);
-        setError(`Пак не открылся: ${e instanceof Error ? e.message : String(e)}`);
+        setError(`Не удалось открыть пак: ${e instanceof Error ? e.message : String(e)}`);
       } finally {
         unDl();
         unImp();
       }
     },
-    [refreshLibrary]
+    [refreshLibrary, coop]
   );
+
+  const selfParticipant = useCallback(() => {
+    const { id } = ensurePlayer();
+    const name = loadSettings().playerName.trim() || "Игрок";
+    return { id, name, ready: true, connected: true };
+  }, []);
+
+  const hostCoop = useCallback(
+    async (slug: string) => {
+      try {
+        const meta = packs.find((p) => p.slug === slug) ?? (await loadPackMeta(slug));
+        const dubId = newCoopDubId();
+        await ensureDub(slug, dubId, "coop");
+        const session = await CoopSession.create({ meta, slug, dubId, self: selfParticipant() });
+        setCoop(session);
+        setScreen({ name: "lobby" });
+      } catch (e) {
+        setError(`Не удалось открыть комнату: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    },
+    [packs, selfParticipant]
+  );
+
+  const joinCoop = useCallback(
+    async (code: string) => {
+      try {
+        const session = await CoopSession.join({ code, self: selfParticipant() });
+        setCoop(session);
+        setScreen({ name: "lobby" });
+      } catch (e) {
+        setError(`Не удалось войти в комнату: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    },
+    [selfParticipant]
+  );
+
+  const leaveCoop = useCallback(() => {
+    coop?.leave();
+    setCoop(null);
+    refreshLibrary();
+    setScreen({ name: "lib" });
+  }, [coop, refreshLibrary]);
 
   const deletePack = useCallback(
     async (slug: string) => {
@@ -112,7 +160,7 @@ export default function App() {
         await api.deletePack(slug);
         await refreshLibrary();
       } catch (e) {
-        setError(`Не смог удалить пак: ${e instanceof Error ? e.message : String(e)}`);
+        setError(`Не удалось удалить пак: ${e instanceof Error ? e.message : String(e)}`);
       }
     },
     [refreshLibrary]
@@ -132,9 +180,11 @@ export default function App() {
         <Library
           packs={packs}
           onOpenMarket={() => setScreen({ name: "market" })}
-          onRecord={(slug) => setScreen({ name: "record", slug })}
-          onWatch={(slug) => setScreen({ name: "watch", slug })}
+          onRecord={(slug, dubId) => setScreen({ name: "record", slug, dubId })}
+          onWatch={(slug, dubId) => setScreen({ name: "watch", slug, dubId })}
           onDelete={deletePack}
+          onHostCoop={hostCoop}
+          onJoinCoop={joinCoop}
           onSettings={() => setSettingsOpen(true)}
         />
       )}
@@ -156,32 +206,51 @@ export default function App() {
           onInstall={installPack}
         />
       )}
+      {screen.name === "lobby" && coop && (
+        <Lobby
+          session={coop}
+          packs={packs}
+          onStarted={(slug, dubId) => setScreen({ name: "record", slug, dubId })}
+          onOpenMarket={() => setScreen({ name: "market" })}
+          onLeave={leaveCoop}
+        />
+      )}
       {screen.name === "record" && (
         <Record
           slug={screen.slug}
+          dubId={screen.dubId}
+          coop={coop}
           startLine={screen.line}
           settingsVersion={settingsVersion}
           onBack={() => {
-            refreshLibrary();
-            setScreen({ name: "lib" });
+            if (coop) leaveCoop();
+            else {
+              refreshLibrary();
+              setScreen({ name: "lib" });
+            }
           }}
           onSettings={() => setSettingsOpen(true)}
-          onResults={(slug) => setScreen({ name: "results", slug })}
+          onResults={(slug, dubId) => setScreen({ name: "results", slug, dubId })}
         />
       )}
       {screen.name === "results" && (
         <Results
           slug={screen.slug}
-          onBack={() => setScreen({ name: "lib" })}
-          onRecordLine={(slug, line) => setScreen({ name: "record", slug, line })}
-          onWatch={(slug) => setScreen({ name: "watch", slug })}
+          dubId={screen.dubId}
+          onBack={() => {
+            if (coop) leaveCoop();
+            else setScreen({ name: "lib" });
+          }}
+          onRecordLine={(slug, dubId, line) => setScreen({ name: "record", slug, dubId, line })}
+          onWatch={(slug, dubId) => setScreen({ name: "watch", slug, dubId })}
         />
       )}
       {screen.name === "watch" && (
         <Watch
           slug={screen.slug}
-          onBack={() => setScreen({ name: "results", slug: screen.slug })}
-          onRecord={(slug) => setScreen({ name: "record", slug })}
+          dubId={screen.dubId}
+          onBack={() => setScreen({ name: "results", slug: screen.slug, dubId: screen.dubId })}
+          onRecord={(slug, dubId) => setScreen({ name: "record", slug, dubId })}
         />
       )}
 
@@ -220,9 +289,9 @@ export default function App() {
             [
               ["библиотека", { name: "lib" }],
               ["витрина", { name: "market" }],
-              ["запись", { name: "record", slug: "mock-0" }],
-              ["итоги", { name: "results", slug: "mock-0" }],
-              ["просмотр", { name: "watch", slug: "mock-0" }]
+              ["запись", { name: "record", slug: "mock-0", dubId: SOLO_DUB }],
+              ["итоги", { name: "results", slug: "mock-0", dubId: SOLO_DUB }],
+              ["просмотр", { name: "watch", slug: "mock-0", dubId: SOLO_DUB }]
             ] as [string, Screen][]
           ).map(([label, s]) => (
             <button

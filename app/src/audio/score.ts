@@ -9,6 +9,18 @@ export interface TakeAnalysis {
   overrun: number;
 }
 
+const VERDICT_LABEL: Record<TakeAnalysis["verdict"], string> = {
+  "в точку": "в точку",
+  "поздно": "поздно",
+  "коротко": "коротко",
+  "за окном": "длинно",
+  "тишина": "тишина"
+};
+
+export function verdictLabel(v: TakeAnalysis["verdict"]): string {
+  return VERDICT_LABEL[v] ?? v;
+}
+
 export function verdictColor(v: TakeAnalysis["verdict"]): string {
   if (v === "в точку") return "var(--green)";
   if (v === "тишина") return "var(--red)";

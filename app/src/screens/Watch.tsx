@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api, assetUrl, loadPackMeta, loadTakes } from "../api";
+import { api, assetUrl, loadPackMeta, loadTranslation } from "../api";
+import { dubRel, loadTakes } from "../dubs";
 import { renderMix } from "../audio/mixer";
 import { MixPlayer } from "../audio/mixplayer";
-import { loadSettings } from "../settings";
+import { loadSettings, updateSettings } from "../settings";
 import { isTauri } from "../mock";
 import { dlog } from "../log";
-import type { PackMeta, TakesMap } from "../types";
+import { displayText } from "../translate";
+import type { PackMeta, TakesMap, TranslationMap } from "../types";
 
 export default function Watch(props: {
   slug: string;
+  dubId: string;
   onBack: () => void;
-  onRecord: (slug: string) => void;
+  onRecord: (slug: string, dubId: string) => void;
 }) {
   const [meta, setMeta] = useState<PackMeta | null>(null);
   const [takes, setTakes] = useState<TakesMap>({});
@@ -21,6 +24,8 @@ export default function Watch(props: {
   const [error, setError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const [exportedPath, setExportedPath] = useState<string | null>(null);
+  const [translation, setTranslation] = useState<TranslationMap>({});
+  const [showTranslation, setShowTranslation] = useState(() => loadSettings().showTranslation);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const timelineRef = useRef<HTMLCanvasElement>(null);
@@ -46,10 +51,12 @@ export default function Watch(props: {
     (async () => {
       dlog("watch: mount", props.slug);
       const m = await loadPackMeta(props.slug);
-      const t = await loadTakes(props.slug);
+      const t = await loadTakes(props.slug, props.dubId);
+      const tr = await loadTranslation(props.slug);
       if (!alive) return;
       setMeta(m);
       setTakes(t);
+      setTranslation(tr);
       if (!isTauri) {
         setReady(true);
         return;
@@ -60,7 +67,7 @@ export default function Watch(props: {
       let createdAt = 0;
       let storedGain = -1;
       try {
-        const mj = JSON.parse(await api.readText(props.slug, "mix.json"));
+        const mj = JSON.parse(await api.readText(props.slug, dubRel(props.dubId, "mix.json")));
         createdAt = mj.createdAt ?? 0;
         storedGain = mj.backingGain ?? -1;
       } catch {
@@ -74,7 +81,7 @@ export default function Watch(props: {
           .filter((l) => t[l.id])
           .map((l) => ({
             start: l.start,
-            url: assetUrl(props.slug, t[l.id].file) + `?v=${t[l.id].recordedAt}`
+            url: assetUrl(props.slug, dubRel(props.dubId, t[l.id].file)) + `?v=${t[l.id].recordedAt}`
           }));
         const wav = await renderMix({
           duration: m.videoDuration,
@@ -83,12 +90,16 @@ export default function Watch(props: {
           takes: takeList
         });
         if (!alive) return;
-        await api.writeBinary(props.slug, "mix.wav", wav);
+        await api.writeBinary(props.slug, dubRel(props.dubId, "mix.wav"), wav);
         mixVersion = Date.now();
-        await api.writeText(props.slug, "mix.json", JSON.stringify({ createdAt: mixVersion, backingGain }));
+        await api.writeText(
+          props.slug,
+          dubRel(props.dubId, "mix.json"),
+          JSON.stringify({ createdAt: mixVersion, backingGain })
+        );
         setBuilding(false);
       }
-      await player.load(assetUrl(props.slug, "mix.wav") + `?v=${mixVersion}`);
+      await player.load(assetUrl(props.slug, dubRel(props.dubId, "mix.wav")) + `?v=${mixVersion}`);
       if (!alive) return;
       dlog("watch: mix decoded,", player.duration.toFixed(2), "s");
       setReady(true);
@@ -106,7 +117,7 @@ export default function Watch(props: {
       playerRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.slug]);
+  }, [props.slug, props.dubId]);
 
   // главный цикл: звук — мастер, видео и отрисовка подтягиваются
   useEffect(() => {
@@ -236,7 +247,7 @@ export default function Watch(props: {
     return (
       <div style={{ flex: 1, display: "grid", placeItems: "center" }}>
         <div className="mono pulse" style={{ color: "var(--text-dim)", fontSize: 13 }}>
-          {building ? "свожу дубляж…" : "готовлю дорожку…"}
+          {building ? "Сведение дубляжа…" : "Подготовка дорожки…"}
         </div>
       </div>
     );
@@ -286,7 +297,7 @@ export default function Watch(props: {
           <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
             <div
               onClick={props.onBack}
-              title="назад"
+              title="Назад"
               style={{ flex: "none", width: 34, height: 34, borderRadius: 99, background: "#0a0c0d99", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
             >
               <div style={{ width: 0, height: 0, borderRight: "8px solid #e9ebed", borderTop: "5px solid transparent", borderBottom: "5px solid transparent" }} />
@@ -296,7 +307,7 @@ export default function Watch(props: {
             </div>
           </div>
           <div style={{ display: "flex", gap: 10, alignItems: "center", flex: "none" }}>
-            <button className="btn" style={{ background: "#0a0c0d99", borderColor: "transparent" }} onClick={() => props.onRecord(props.slug)}>
+            <button className="btn" style={{ background: "#0a0c0d99", borderColor: "transparent" }} onClick={() => props.onRecord(props.slug, props.dubId)}>
               Переозвучить
             </button>
             <button
@@ -306,16 +317,16 @@ export default function Watch(props: {
                 setExporting(true);
                 setExportedPath(null);
                 try {
-                  const path = await api.exportVideo(props.slug, meta.title);
+                  const path = await api.exportVideo(props.slug, props.dubId, meta.title);
                   setExportedPath(path);
                 } catch (e) {
-                  setError(`Экспорт не удался: ${e instanceof Error ? e.message : String(e)}`);
+                  setError(`Не удалось сохранить видео: ${e instanceof Error ? e.message : String(e)}`);
                 } finally {
                   setExporting(false);
                 }
               }}
             >
-              {exporting ? "Собираю mp4…" : "Забрать mp4"}
+              {exporting ? "Сохранение видео…" : "Сохранить видео"}
             </button>
           </div>
         </div>
@@ -328,7 +339,7 @@ export default function Watch(props: {
             style={{ position: "absolute", zIndex: 4, top: 64, right: 20, background: "#0d0f11f0", border: "1px solid var(--green)", color: "var(--text-soft)", borderRadius: 9, padding: "10px 14px", fontSize: 12, maxWidth: 420, cursor: "pointer" }}
             onClick={() => setExportedPath(null)}
           >
-            <span style={{ color: "var(--green)" }}>готово</span> · файл в Загрузках:
+            <span style={{ color: "var(--green)" }}>Готово</span> · файл сохранён в папку «Загрузки»:
             <br />
             {exportedPath.split("/").pop()}
           </div>
@@ -341,8 +352,26 @@ export default function Watch(props: {
               <div className="mono" style={{ fontSize: 11, letterSpacing: "0.1em", color: curLine.color, textShadow: "0 1px 8px #0a0c0d" }}>
                 {curLine.who.toUpperCase()}
               </div>
-              <div style={{ textAlign: "center", fontSize: "clamp(17px,2.6vh,28px)", fontWeight: 500, lineHeight: 1.3, textShadow: "0 2px 18px #0a0c0d" }}>
-                {curLine.text}
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!translation[curLine.id]) return;
+                  const next = !showTranslation;
+                  setShowTranslation(next);
+                  updateSettings({ showTranslation: next });
+                }}
+                title={translation[curLine.id] ? "нажмите, чтобы переключить оригинал и перевод" : undefined}
+                style={{
+                  textAlign: "center",
+                  fontSize: "clamp(17px,2.6vh,28px)",
+                  fontWeight: 500,
+                  lineHeight: 1.3,
+                  textShadow: "0 2px 18px #0a0c0d",
+                  pointerEvents: translation[curLine.id] ? "auto" : "none",
+                  cursor: translation[curLine.id] ? "pointer" : "default"
+                }}
+              >
+                {displayText(curLine, translation, showTranslation)}
               </div>
             </div>
           </div>
@@ -376,7 +405,7 @@ export default function Watch(props: {
               <span ref={timeRef}>00:00.00</span> <span style={{ color: "var(--text-dim)" }}>/ {fmt(meta.videoDuration)}</span>
             </div>
             <div className="mono" style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-faint)" }}>
-              пробел — пауза · ←/→ — ±5 с · клик по видео — плей
+              пробел — пауза · ←/→ — ±5 с · клик по видео — воспроизведение
             </div>
           </div>
         </div>

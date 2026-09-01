@@ -3,7 +3,18 @@ import { invoke } from "@tauri-apps/api/core";
 import { isTauri } from "../mock";
 import { DEFAULT_SETTINGS, loadSettings, saveSettings, type AppSettings } from "../settings";
 
+const TABS = [
+  { id: "mic", label: "Микрофон" },
+  { id: "take", label: "Дубль" },
+  { id: "translate", label: "Перевод" },
+  { id: "coop", label: "Вместе" },
+  { id: "storage", label: "Хранилище" }
+] as const;
+
+type TabId = (typeof TABS)[number]["id"];
+
 export default function SettingsModal(props: { onClose: () => void }) {
+  const [tab, setTab] = useState<TabId>("mic");
   const [s, setS] = useState<AppSettings>(loadSettings);
   const [devices, setDevices] = useState<{ id: string; label: string }[]>([]);
   const [micError, setMicError] = useState<string | null>(null);
@@ -43,7 +54,7 @@ export default function SettingsModal(props: { onClose: () => void }) {
         try {
           stream = await navigator.mediaDevices.getUserMedia({ audio: base });
         } catch (e) {
-          if (alive) setMicError(`нет доступа к микрофону: ${e instanceof Error ? e.message : e}`);
+          if (alive) setMicError(`Нет доступа к микрофону: ${e instanceof Error ? e.message : e}`);
           return;
         }
       }
@@ -109,12 +120,8 @@ export default function SettingsModal(props: { onClose: () => void }) {
 
   return (
     <div className="overlay" onClick={props.onClose}>
-      <div
-        className="modal"
-        style={{ width: 880, maxWidth: "calc(100vw - 48px)", padding: 0, gap: 0, overflow: "hidden" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div style={{ height: 60, flex: "none", borderBottom: "1px solid var(--card-border)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px" }}>
+      <div className="modal settings-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="settings-head">
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div style={{ fontSize: 19, fontWeight: 500 }}>Настройки</div>
             <div className="mono" style={{ fontSize: 11, color: "var(--text-faint)" }}>запоминаются между запусками</div>
@@ -122,125 +129,256 @@ export default function SettingsModal(props: { onClose: () => void }) {
           <button className="btn" style={{ padding: "7px 14px", fontSize: 13 }} onClick={props.onClose}>Готово</button>
         </div>
 
-        <div style={{ overflowY: "auto", padding: 22, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 18, alignContent: "start" }}>
-          {/* микрофон */}
-          <div className="card" style={{ background: "#191d20", padding: 20, display: "flex", flexDirection: "column", gap: 18 }}>
-            <div className="label" style={{ color: "var(--text-dim)" }}>Микрофон</div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <div className="label">Устройство</div>
-              <select
-                className="search"
-                value={s.micId ?? ""}
-                onChange={(e) => update({ micId: e.target.value || null })}
-                style={{ appearance: "none", cursor: "pointer" }}
+        <div className="settings-body">
+          <div className="settings-nav">
+            {TABS.map((t) => (
+              <div
+                key={t.id}
+                className={`settings-nav-item${tab === t.id ? " active" : ""}`}
+                onClick={() => setTab(t.id)}
               >
-                <option value="">Системный по умолчанию</option>
-                {devices.map((d) => (
-                  <option key={d.id} value={d.id}>{d.label}</option>
-                ))}
-              </select>
-              {micError && <div className="mono" style={{ fontSize: 11, color: "var(--red)" }}>{micError}</div>}
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div className="label">Усиление входа</div>
-                <div className="mono" style={{ fontSize: 12, color: "var(--text-soft)" }}>
-                  {gainDb > 0 ? "+" : ""}{gainDb} дБ
-                </div>
+                {t.label}
               </div>
-              <input
-                type="range"
-                min={0.5}
-                max={3}
-                step={0.05}
-                value={s.gain}
-                onChange={(e) => update({ gain: Number(e.target.value) })}
-              />
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 4 }}>
-                <div style={{ flex: 1, height: 12, background: "#101315", border: "1px solid var(--card-border)", borderRadius: 4, overflow: "hidden" }}>
-                  <div ref={meterRef} style={{ width: "0%", height: "100%", background: "var(--green)", transition: "width .06s linear" }} />
-                </div>
-                <div className="mono" style={{ fontSize: 11, color: "var(--text-faint)", flex: "none" }}>говорите — полоска живая</div>
-              </div>
-            </div>
-
-            <ToggleRow
-              title="Обработка браузера"
-              hint="шумодав и автоуровень — включайте только в шумной комнате"
-              on={s.dsp}
-              onToggle={() => update({ dsp: !s.dsp })}
-            />
+            ))}
           </div>
 
-          {/* дубль */}
-          <div className="card" style={{ background: "#191d20", padding: 20, display: "flex", flexDirection: "column", gap: 18 }}>
-            <div className="label" style={{ color: "var(--text-dim)" }}>Дубль</div>
+          <div className="settings-pane">
+            {tab === "mic" && (
+              <div className="settings-section">
+                <div className="settings-section-head">
+                  <div className="settings-section-title">Микрофон</div>
+                  <div className="settings-section-note">то, чем вы записываете дубли</div>
+                </div>
 
-            <SliderRow
-              label="Разбег перед репликой"
-              value={`${s.lead.toFixed(1)} с`}
-              min={0.7}
-              max={5}
-              step={0.1}
-              num={s.lead}
-              onChange={(v) => update({ lead: v })}
-              hintLeft="0,7 — почти сразу"
-              hintRight="5 с"
-            />
-            <SliderRow
-              label="Фонограмма в сведении"
-              value={`${Math.round(s.backingGain * 100)}%`}
-              min={0}
-              max={1}
-              step={0.05}
-              num={s.backingGain}
-              onChange={(v) => update({ backingGain: v })}
-              hintLeft="0 — только голос"
-              hintRight="100%"
-            />
-            <ToggleRow
-              title="Тики отсчёта"
-              hint="щелчки на разбеге перед записью"
-              on={s.ticks}
-              onToggle={() => update({ ticks: !s.ticks })}
-            />
-          </div>
+                <div className="field">
+                  <div className="label">Устройство</div>
+                  <select
+                    className="search"
+                    value={s.micId ?? ""}
+                    onChange={(e) => update({ micId: e.target.value || null })}
+                    style={{ appearance: "none", cursor: "pointer" }}
+                  >
+                    <option value="">Системный по умолчанию</option>
+                    {devices.map((d) => (
+                      <option key={d.id} value={d.id}>{d.label}</option>
+                    ))}
+                  </select>
+                  {micError && <div className="mono" style={{ fontSize: 11, color: "var(--red)" }}>{micError}</div>}
+                </div>
 
-          {/* хранилище */}
-          <div className="card" style={{ gridColumn: "1 / -1", background: "#191d20", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-            <div style={{ display: "flex", gap: 36, flexWrap: "wrap" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <div className="label">Место на устройстве</div>
-                <div style={{ fontSize: 14 }}>
-                  {storage ? `${(storage.bytes / 1073741824).toFixed(2)} ГБ · ${storage.packs} ${plural(storage.packs, "пак", "пака", "паков")}` : "—"}
+                <div className="field">
+                  <div className="field-head">
+                    <div className="label">Усиление входа</div>
+                    <div className="field-value">{gainDb > 0 ? "+" : ""}{gainDb} дБ</div>
+                  </div>
+                  <input
+                    type="range"
+                    min={0.5}
+                    max={3}
+                    step={0.05}
+                    value={s.gain}
+                    onChange={(e) => update({ gain: Number(e.target.value) })}
+                  />
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 2 }}>
+                    <div style={{ flex: 1, height: 12, background: "#101315", border: "1px solid var(--card-border)", borderRadius: 4, overflow: "hidden" }}>
+                      <div ref={meterRef} style={{ width: "0%", height: "100%", background: "var(--green)", transition: "width .06s linear" }} />
+                    </div>
+                  </div>
+                  <div className="field-note">скажите что-нибудь — полоска оживёт</div>
+                </div>
+
+                <div className="settings-divider" />
+
+                <ToggleRow
+                  title="Шумоподавление"
+                  hint="подавление шума и автоуровень — включайте только в шумной комнате"
+                  on={s.dsp}
+                  onToggle={() => update({ dsp: !s.dsp })}
+                />
+
+                <div className="stat-row">
+                  <div className="label">Доступ к микрофону</div>
+                  <div className="stat-value" style={{ color: micError ? "var(--red)" : "var(--green)" }}>
+                    {micError ? "нет доступа" : "разрешён"}
+                  </div>
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <div className="label">Доступ к микрофону</div>
-                <div style={{ fontSize: 14, color: micError ? "var(--red)" : "var(--green)" }}>
-                  {micError ? "нет доступа" : "разрешён"}
+            )}
+
+            {tab === "take" && (
+              <div className="settings-section">
+                <div className="settings-section-head">
+                  <div className="settings-section-title">Дубль</div>
+                  <div className="settings-section-note">как ведёт себя запись и сведение</div>
+                </div>
+
+                <SliderRow
+                  label="Отсчёт перед репликой"
+                  value={`${s.lead.toFixed(1)} с`}
+                  min={0.7}
+                  max={5}
+                  step={0.1}
+                  num={s.lead}
+                  onChange={(v) => update({ lead: v })}
+                  hintLeft="0,7 — почти сразу"
+                  hintRight="5 с"
+                />
+                <SliderRow
+                  label="Фонограмма в сведении"
+                  value={`${Math.round(s.backingGain * 100)}%`}
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  num={s.backingGain}
+                  onChange={(v) => update({ backingGain: v })}
+                  hintLeft="0 — только голос"
+                  hintRight="100%"
+                />
+
+                <div className="settings-divider" />
+
+                <ToggleRow
+                  title="Щелчки отсчёта"
+                  hint="щелчки во время отсчёта перед записью"
+                  on={s.ticks}
+                  onToggle={() => update({ ticks: !s.ticks })}
+                />
+              </div>
+            )}
+
+            {tab === "translate" && (
+              <div className="settings-section">
+                <div className="settings-section-head">
+                  <div className="settings-section-title">Перевод реплик</div>
+                  <div className="settings-section-note">почти все паки в каталоге на английском</div>
+                </div>
+
+                <div className="field">
+                  <div className="label">Ключ DeepL</div>
+                  <input
+                    className="search"
+                    type="password"
+                    placeholder="вставьте ключ API"
+                    value={s.deeplKey}
+                    onChange={(e) => update({ deeplKey: e.target.value })}
+                  />
+                  <div className="field-note">
+                    бесплатный тариф DeepL — 500 000 знаков в месяц. Ключ хранится только на этом устройстве
+                  </div>
+                </div>
+
+                <div className="settings-divider" />
+
+                <ToggleRow
+                  title="Показывать перевод"
+                  hint="в записи, субтитрах и итогах вместо оригинального текста"
+                  on={s.showTranslation}
+                  onToggle={() => update({ showTranslation: !s.showTranslation })}
+                />
+              </div>
+            )}
+
+            {tab === "coop" && (
+              <div className="settings-section">
+                <div className="settings-section-head">
+                  <div className="settings-section-title">Совместная озвучка</div>
+                  <div className="settings-section-note">запись идёт напрямую между участниками</div>
+                </div>
+
+                <div className="field">
+                  <div className="label">Как вас зовут в комнате</div>
+                  <input
+                    className="search"
+                    placeholder="Игрок"
+                    value={s.playerName}
+                    onChange={(e) => update({ playerName: e.target.value })}
+                  />
+                  <div className="field-note">это имя увидят остальные в лобби и в итогах</div>
+                </div>
+
+                <div className="settings-divider" />
+
+                <div className="field">
+                  <div className="label">Сервер комнат</div>
+                  <input
+                    className="search"
+                    placeholder="wss://choicervoicer.com/dub-rooms"
+                    value={s.signalingUrl}
+                    onChange={(e) => update({ signalingUrl: e.target.value })}
+                  />
+                  <div className="field-note">
+                    нужен только чтобы найти друг друга по коду — дубли идут мимо него, напрямую
+                  </div>
+                </div>
+
+                <div className="field">
+                  <div className="label">TURN на случай строгой сети</div>
+                  <input
+                    className="search"
+                    placeholder="turn:turn.example.com:3478"
+                    value={s.turnUrl}
+                    onChange={(e) => update({ turnUrl: e.target.value })}
+                  />
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <input
+                      className="search"
+                      placeholder="логин"
+                      value={s.turnUser}
+                      onChange={(e) => update({ turnUser: e.target.value })}
+                    />
+                    <input
+                      className="search"
+                      type="password"
+                      placeholder="пароль"
+                      value={s.turnPass}
+                      onChange={(e) => update({ turnPass: e.target.value })}
+                    />
+                  </div>
+                  <div className="field-note">
+                    оставьте пустым, если прямое соединение и так встаёт: TURN нужен, когда провайдер прячет вас за
+                    строгим NAT
+                  </div>
                 </div>
               </div>
-            </div>
-            <div style={{ display: "flex", gap: 10 }}>
-              {isTauri && (
-                <button className="btn" style={{ fontSize: 13 }} onClick={() => invoke("reveal_packs").catch(() => {})}>
-                  Показать папку паков
-                </button>
-              )}
-              <button
-                className="btn"
-                style={{ fontSize: 13 }}
-                onClick={() => {
-                  saveSettings(DEFAULT_SETTINGS);
-                  setS({ ...DEFAULT_SETTINGS });
-                }}
-              >
-                Сбросить настройки
-              </button>
-            </div>
+            )}
+
+            {tab === "storage" && (
+              <div className="settings-section">
+                <div className="settings-section-head">
+                  <div className="settings-section-title">Хранилище</div>
+                  <div className="settings-section-note">паки, записи и сведённый дубляж лежат на этом устройстве</div>
+                </div>
+
+                <div className="stat-row">
+                  <div className="label">Занято</div>
+                  <div className="stat-value">
+                    {storage
+                      ? `${(storage.bytes / 1073741824).toFixed(2)} ГБ · ${storage.packs} ${plural(storage.packs, "пак", "пака", "паков")}`
+                      : "—"}
+                  </div>
+                </div>
+
+                <div className="settings-divider" />
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "flex-start" }}>
+                  {isTauri && (
+                    <button className="btn" style={{ fontSize: 13 }} onClick={() => invoke("reveal_packs").catch(() => {})}>
+                      Показать папку паков
+                    </button>
+                  )}
+                  <button
+                    className="btn"
+                    style={{ fontSize: 13 }}
+                    onClick={() => {
+                      saveSettings(DEFAULT_SETTINGS);
+                      setS({ ...DEFAULT_SETTINGS });
+                    }}
+                  >
+                    Сбросить настройки
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

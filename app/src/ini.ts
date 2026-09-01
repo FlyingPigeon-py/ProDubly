@@ -59,7 +59,12 @@ function cleanCaption(s: string): string {
   return t;
 }
 
-export function buildPackMeta(slug: string, report: ImportReport, fallbackTitle?: string): PackMeta {
+export function buildPackMeta(
+  slug: string,
+  report: ImportReport,
+  fallbackTitle?: string,
+  fallbackAuthor?: string
+): PackMeta {
   const info = parseIniData(report.pack_info);
 
   const lines: PackLine[] = [];
@@ -69,6 +74,7 @@ export function buildPackMeta(slug: string, report: ImportReport, fallbackTitle?
     const start =
       Array.isArray(stamps) && stamps.length > 0 ? Number(stamps[0]) : NaN;
     if (!Number.isFinite(start)) continue;
+    if (report.video_duration > 0 && start >= report.video_duration) continue;
 
     const chars = meta["dub_characters"];
     const who =
@@ -108,10 +114,11 @@ export function buildPackMeta(slug: string, report: ImportReport, fallbackTitle?
   }
 
   const authors = info["authors"];
+  const fallbackAuthors = fallbackAuthor ? [fallbackAuthor] : [];
   return {
     slug,
     title: typeof info["title"] === "string" && info["title"] ? (info["title"] as string) : fallbackTitle ?? slug,
-    authors: Array.isArray(authors) ? authors.map(String) : [],
+    authors: Array.isArray(authors) && authors.length > 0 ? authors.map(String) : fallbackAuthors,
     icon: report.icon,
     cover: report.cover,
     video: report.video,

@@ -78,14 +78,14 @@ export default function PackView(props: {
                   )}
                   <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center" }}>
                     <div className="mono" style={{ fontSize: 12, color: "var(--text-dim)", background: "#0a0c0dcc", borderRadius: 99, padding: "6px 14px" }}>
-                      превью недоступно — но пак можно скачать
+                      Предпросмотр недоступен, но пак можно скачать
                     </div>
                   </div>
                 </>
               )}
             </div>
             <div className="mono" style={{ marginTop: 10, fontSize: 11, color: "var(--text-faint)" }}>
-              превью с оригинальной озвучкой · после скачивания все реплики будут вашими
+              предпросмотр с оригинальной озвучкой · после скачивания все реплики озвучиваете вы
             </div>
           </div>
 

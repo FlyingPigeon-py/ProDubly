@@ -1,21 +1,36 @@
 import { useEffect, useMemo, useState } from "react";
-import { loadPackMeta, loadTakes } from "../api";
-import { verdictColor } from "../audio/score";
-import type { PackMeta, TakesMap } from "../types";
+import { loadPackMeta, loadTranslation } from "../api";
+import { loadDub, loadTakes } from "../dubs";
+import { participantSummaries, takeAuthorName } from "../session/summary";
+import { verdictColor, verdictLabel, type TakeAnalysis } from "../audio/score";
+import { displayText } from "../translate";
+import { loadSettings } from "../settings";
+import type { DubInfo, PackMeta, TakesMap, TranslationMap } from "../types";
 
 export default function Results(props: {
   slug: string;
+  dubId: string;
   onBack: () => void;
-  onRecordLine: (slug: string, lineIdx: number) => void;
-  onWatch: (slug: string) => void;
+  onRecordLine: (slug: string, dubId: string, lineIdx: number) => void;
+  onWatch: (slug: string, dubId: string) => void;
 }) {
   const [meta, setMeta] = useState<PackMeta | null>(null);
   const [takes, setTakes] = useState<TakesMap>({});
+  const [dub, setDub] = useState<DubInfo | null>(null);
+  const [translation, setTranslation] = useState<TranslationMap>({});
+  const showTranslation = loadSettings().showTranslation;
 
   useEffect(() => {
     loadPackMeta(props.slug).then(setMeta);
-    loadTakes(props.slug).then(setTakes);
-  }, [props.slug]);
+    loadTakes(props.slug, props.dubId).then(setTakes);
+    loadDub(props.slug, props.dubId).then(setDub);
+    loadTranslation(props.slug).then(setTranslation);
+  }, [props.slug, props.dubId]);
+
+  const summaries = useMemo(
+    () => (meta && dub && dub.kind === "coop" ? participantSummaries(meta, takes, dub) : []),
+    [meta, takes, dub]
+  );
 
   const stats = useMemo(() => {
     if (!meta) return null;
@@ -44,13 +59,13 @@ export default function Results(props: {
     return (
       <div style={{ flex: 1, display: "grid", placeItems: "center", background: "var(--panel-bg)" }}>
         <div className="mono pulse" style={{ color: "var(--text-dim)", fontSize: 13 }}>
-          считаю итоги…
+          Подсчёт итогов…
         </div>
       </div>
     );
   }
 
-  const verdictOrder: [string, string][] = [
+  const verdictOrder: [TakeAnalysis["verdict"], string][] = [
     ["в точку", "var(--green)"],
     ["поздно", "var(--amber)"],
     ["коротко", "var(--amber)"],
@@ -77,13 +92,20 @@ export default function Results(props: {
             ← Библиотека
           </div>
           <div style={{ width: 1, height: 20, background: "var(--card-border)" }} />
-          <div style={{ fontSize: 15, fontWeight: 500 }}>{meta.title} · итоги</div>
+          <div style={{ fontSize: 15, fontWeight: 500 }}>
+            {meta.title} · итоги{dub?.kind === "coop" ? " совместной озвучки" : ""}
+          </div>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
-          <button className="btn" style={{ fontSize: 13 }} onClick={() => props.onRecordLine(props.slug, 0)}>
+          <button className="btn" style={{ fontSize: 13 }} onClick={() => props.onRecordLine(props.slug, props.dubId, 0)}>
             Вернуться к репликам
           </button>
-          <button className="btn btn-primary" style={{ fontSize: 13 }} onClick={() => props.onWatch(props.slug)} disabled={stats.scored === 0}>
+          <button
+            className="btn btn-primary"
+            style={{ fontSize: 13 }}
+            onClick={() => props.onWatch(props.slug, props.dubId)}
+            disabled={stats.scored === 0}
+          >
             Смотреть дубляж
           </button>
         </div>
@@ -108,6 +130,26 @@ export default function Results(props: {
             </div>
           </div>
 
+          {summaries.length > 0 && (
+            <div className="card" style={{ padding: 22, display: "flex", flexDirection: "column", gap: 13, borderRadius: 12 }}>
+              <div className="label">Кто как отработал</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
+                {summaries.map((s, i) => (
+                  <div key={s.id} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                      <div className="mono" style={{ fontSize: 11, color: "var(--text-faint)", width: 14 }}>{i + 1}</div>
+                      <div style={{ fontSize: 14, color: "var(--text)" }}>{s.name}</div>
+                      <div className="mono" style={{ marginLeft: "auto", fontSize: 13, color: "var(--amber)" }}>{s.averageScore}</div>
+                    </div>
+                    <div className="mono" style={{ paddingLeft: 23, fontSize: 11, color: "var(--text-faint)" }}>
+                      {s.characters.join(", ") || "без роли"} · {s.recorded} из {s.lines} · промах {s.averageMiss.toFixed(2)} с
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="card" style={{ padding: 22, display: "flex", flexDirection: "column", gap: 13, borderRadius: 12 }}>
             <div className="label">Вердикты</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
@@ -115,7 +157,7 @@ export default function Results(props: {
                 const n = stats.verdicts.get(v) ?? 0;
                 return (
                   <div key={v} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div className="mono" style={{ width: 70, fontSize: 11, color }}>{v}</div>
+                    <div className="mono" style={{ width: 70, fontSize: 11, color }}>{verdictLabel(v)}</div>
                     <div style={{ flex: 1, height: 10, background: "var(--card-border)", borderRadius: 3, overflow: "hidden" }}>
                       <div style={{ width: `${(n / maxVerdict) * 100}%`, height: "100%", background: color }} />
                     </div>
@@ -147,7 +189,7 @@ export default function Results(props: {
               return (
                 <div
                   key={line.id}
-                  onClick={() => props.onRecordLine(props.slug, idx)}
+                  onClick={() => props.onRecordLine(props.slug, props.dubId, idx)}
                   className="row-hover"
                   style={{ display: "flex", alignItems: "center", minWidth: 640, padding: "11px 20px", borderBottom: "1px solid #191d20", cursor: "pointer" }}
                 >
@@ -159,8 +201,13 @@ export default function Results(props: {
                       {line.who}
                     </div>
                     <div style={{ fontSize: 13, color: "var(--text-soft)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {line.text}
+                      {displayText(line, translation, showTranslation)}
                     </div>
+                    {dub && takeAuthorName(dub, take?.authorId) && (
+                      <div className="mono" style={{ flex: "none", fontSize: 10.5, color: "var(--text-faint)" }}>
+                        {takeAuthorName(dub, take?.authorId)}
+                      </div>
+                    )}
                   </div>
                   <div className="mono" style={{ width: 92, flex: "none", fontSize: 12, color: "var(--text-mute)" }}>
                     {a ? `+${a.startOffset.toFixed(2)} с` : "—"}
@@ -168,7 +215,7 @@ export default function Results(props: {
                   <div style={{ width: 104, flex: "none" }}>
                     {a ? (
                       <span className="mono" style={{ fontSize: 11, border: `1px solid ${vColor}`, color: vColor, borderRadius: 99, padding: "3px 9px" }}>
-                        {a.verdict}
+                        {verdictLabel(a.verdict)}
                       </span>
                     ) : (
                       <span className="mono" style={{ fontSize: 11, color: "var(--text-faint)" }}>нет дубля</span>
@@ -182,7 +229,7 @@ export default function Results(props: {
             })}
           </div>
           <div className="mono" style={{ padding: "12px 20px", borderTop: "1px solid var(--card-border)", fontSize: 11, color: "var(--text-faint)" }}>
-            нажмите на реплику, чтобы переписать её
+            Нажмите на реплику, чтобы переписать её
           </div>
         </div>
       </div>

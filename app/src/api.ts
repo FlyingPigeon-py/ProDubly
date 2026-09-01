@@ -5,9 +5,9 @@ import type {
   ImportProgressEvent,
   ImportReport,
   PackMeta,
-  TakesMap
+  TranslationMap
 } from "./types";
-import { isTauri, mockIndex, mockMeta, mockTakes } from "./mock";
+import { isTauri, mockIndex, mockMeta } from "./mock";
 
 let packsDir = "";
 
@@ -38,7 +38,14 @@ export const api = {
     }),
   deleteFile: (slug: string, rel: string) => invoke<void>("delete_pack_file", { slug, rel }),
   deletePack: (slug: string) => invoke<void>("delete_pack", { slug }),
-  exportVideo: (slug: string, title: string) => invoke<string>("export_video", { slug, title }),
+  exportVideo: (slug: string, dub: string, title: string) => invoke<string>("export_video", { slug, dub, title }),
+  migrateDubs: (slug: string) => (isTauri ? invoke<boolean>("migrate_dubs", { slug }) : Promise.resolve(false)),
+  listDubs: (slug: string) => (isTauri ? invoke<string[]>("list_dubs", { slug }) : Promise.resolve<string[]>([])),
+  deleteDub: (slug: string, dub: string) => invoke<void>("delete_dub", { slug, dub }),
+  translateLines: (key: string, texts: string[], context: string) =>
+    invoke<string[]>("translate_lines", { key, texts, context }),
+  readTranslation: (slug: string) => invoke<string>("read_translation", { slug }),
+  writeTranslation: (slug: string, content: string) => invoke<void>("write_translation", { slug, content }),
 
   onDownloadProgress: (cb: (p: DownloadProgress) => void): Promise<UnlistenFn> =>
     isTauri
@@ -47,7 +54,9 @@ export const api = {
   onImportProgress: (cb: (p: ImportProgressEvent) => void): Promise<UnlistenFn> =>
     isTauri
       ? listen<ImportProgressEvent>("import-progress", (e) => cb(e.payload))
-      : Promise.resolve(noopUnlisten)
+      : Promise.resolve(noopUnlisten),
+  onIndexUpdated: (cb: (text: string) => void): Promise<UnlistenFn> =>
+    isTauri ? listen<string>("index-updated", (e) => cb(e.payload)) : Promise.resolve(noopUnlisten)
 };
 
 export async function loadPackMeta(slug: string): Promise<PackMeta> {
@@ -55,16 +64,23 @@ export async function loadPackMeta(slug: string): Promise<PackMeta> {
   return JSON.parse(await api.readText(slug, "pack.json"));
 }
 
-export async function loadTakes(slug: string): Promise<TakesMap> {
-  if (!isTauri) return mockTakes(mockMeta(slug));
+export async function loadTranslation(slug: string): Promise<TranslationMap> {
+  if (!isTauri) return {};
   try {
-    return JSON.parse(await api.readText(slug, "takes.json"));
+    return JSON.parse(await api.readTranslation(slug));
+  } catch {
+    // перевод мог остаться внутри папки пака от прежних версий
+  }
+  try {
+    const legacy = JSON.parse(await api.readText(slug, "translation-ru.json")) as TranslationMap;
+    await saveTranslation(slug, legacy);
+    return legacy;
   } catch {
     return {};
   }
 }
 
-export async function saveTakes(slug: string, takes: TakesMap): Promise<void> {
+export async function saveTranslation(slug: string, map: TranslationMap): Promise<void> {
   if (!isTauri) return;
-  await api.writeText(slug, "takes.json", JSON.stringify(takes, null, 2));
+  await api.writeTranslation(slug, JSON.stringify(map, null, 2));
 }

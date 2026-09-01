@@ -9,8 +9,8 @@ export interface ImportState {
 
 export default function ImportModal({ state }: { state: ImportState }) {
   const phases: { id: ImportState["phase"]; label: string }[] = [
-    { id: "download", label: "Скачиваю пак" },
-    { id: "convert", label: "Привожу медиа к тому, что играет приложение" }
+    { id: "download", label: "Скачивание пака" },
+    { id: "convert", label: "Подготовка пака к записи" }
   ];
   const phaseIdx = phases.findIndex((p) => p.id === state.phase);
 
@@ -26,7 +26,7 @@ export default function ImportModal({ state }: { state: ImportState }) {
             />
           )}
           <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
-            <div style={{ fontSize: 21, fontWeight: 500 }}>Открываю пак «{state.title}»</div>
+            <div style={{ fontSize: 21, fontWeight: 500 }}>Открытие пака «{state.title}»</div>
             <div className="mono" style={{ fontSize: 12, color: "var(--text-dim)" }}>{state.slug}</div>
           </div>
         </div>
@@ -76,12 +76,6 @@ export default function ImportModal({ state }: { state: ImportState }) {
               </div>
             );
           })}
-        </div>
-        <div
-          className="mono"
-          style={{ fontSize: 11, color: "var(--text-faint)", borderTop: "1px solid var(--card-border)", paddingTop: 16 }}
-        >
-          откроется дубль, когда закончу
         </div>
       </div>
     </div>
