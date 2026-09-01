@@ -282,7 +282,7 @@ export default function SettingsModal(props: { onClose: () => void }) {
               <div className="settings-section">
                 <div className="settings-section-head">
                   <div className="settings-section-title">Совместная озвучка</div>
-                  <div className="settings-section-note">запись идёт напрямую между участниками</div>
+                  <div className="settings-section-note">сборка от {__BUILD_STAMP__}</div>
                 </div>
 
                 <div className="field">
@@ -336,7 +336,7 @@ export default function SettingsModal(props: { onClose: () => void }) {
                   </div>
                   <div className="field-note">
                     оставьте пустым, если прямое соединение и так встаёт: TURN нужен, когда провайдер прячет вас за
-                    строгим NAT
+                    строгим NAT или режет STUN
                   </div>
                 </div>
               </div>
